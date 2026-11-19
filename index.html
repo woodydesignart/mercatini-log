@@ -29,7 +29,7 @@
       background: var(--bg);
       color: var(--text);
       line-height: 1.4;
-      overflow-x: hidden;
+      overflow-x: clip;
     }
 
     .app {
@@ -38,6 +38,7 @@
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
+      overflow-x: clip;
     }
 
     /* Barra navigazione schermate + indicatori slide */
@@ -98,12 +99,14 @@
     /* Contenitore slide orizzontali */
     .slides-track {
       flex: 1 1 auto;
+      width: 100%;
       display: flex;
       align-items: flex-start;
       overflow-x: auto;
       overflow-y: hidden;
       scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
+      scroll-behavior: auto;
+      -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
     }
 
@@ -111,8 +114,12 @@
 
     .slide {
       flex: 0 0 100%;
+      min-width: 100%;
+      max-width: 100%;
       width: 100%;
       scroll-snap-align: start;
+      scroll-snap-stop: always;
+      overflow-x: clip;
       padding: 12px;
       padding-bottom: 84px;
     }
@@ -550,7 +557,7 @@
 
     <footer id="floatingFooter" class="app-footer">
       <div class="footer-main">
-        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.0.2</span></span>
+        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.0.3</span></span>
         <span aria-hidden="true">•</span>
         <div class="footer-backup-block">
           <span class="footer-backup-note">Salva o ripristina tutti i dati</span>
@@ -626,7 +633,7 @@
   </div>
 
   <script>
-    const APP_VERSION = "v1.0.2";
+    const APP_VERSION = "v1.0.3";
     const STORAGE_KEY = "mercatini_slide_v3";
 
     document.getElementById("footerYear").textContent = String(new Date().getFullYear());
@@ -820,6 +827,7 @@
     const tabs = [...document.querySelectorAll(".nav-tab")];
     const dots = [...document.querySelectorAll(".dot")];
     const floatingFooter = document.getElementById("floatingFooter");
+    let scrollSyncTimer = null;
 
     function updateFloatingFooterVisibility() {
       const docEl = document.documentElement;
@@ -840,7 +848,7 @@
     }
 
     function scrollPageToTop() {
-      window.scrollTo({ top: 0, behavior: "auto" });
+      window.scrollTo(0, 0);
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
       updateFloatingFooterVisibility();
@@ -852,16 +860,19 @@
       slides.forEach((s, i) => s.classList.toggle("is-active-slide", i === index));
     }
 
-    function goToSlide(index, smooth = true) {
+    function snapTrackToIndex(index) {
+      if (!track.clientWidth) return;
+      track.scrollLeft = index * track.clientWidth;
+    }
+
+    function goToSlide(index, _smooth = true) {
       const clamped = Math.max(0, Math.min(3, index));
       state.currentSlide = clamped;
       saveState();
       updateSlideIndicators(clamped);
       scrollPageToTop();
-      track.scrollTo({
-        left: clamped * track.clientWidth,
-        behavior: smooth ? "smooth" : "auto"
-      });
+      snapTrackToIndex(clamped);
+      requestAnimationFrame(() => snapTrackToIndex(clamped));
     }
 
     tabs.forEach(tab => {
@@ -870,18 +881,23 @@
 
     track.addEventListener("scroll", () => {
       if (!track.clientWidth) return;
-      const idx = Math.round(track.scrollLeft / track.clientWidth);
-      if (idx !== state.currentSlide && idx >= 0 && idx <= 3) {
-        state.currentSlide = idx;
-        updateSlideIndicators(idx);
-        saveState();
-        scrollPageToTop();
-      }
+      clearTimeout(scrollSyncTimer);
+      scrollSyncTimer = setTimeout(() => {
+        const idx = Math.round(track.scrollLeft / track.clientWidth);
+        const clamped = Math.max(0, Math.min(3, idx));
+        snapTrackToIndex(clamped);
+        if (clamped !== state.currentSlide) {
+          state.currentSlide = clamped;
+          updateSlideIndicators(clamped);
+          saveState();
+          scrollPageToTop();
+        }
+      }, 90);
     }, { passive: true });
 
     window.addEventListener("scroll", updateFloatingFooterVisibility, { passive: true });
     window.addEventListener("resize", () => {
-      track.scrollLeft = state.currentSlide * track.clientWidth;
+      snapTrackToIndex(state.currentSlide);
       updateFloatingFooterVisibility();
     });
 
