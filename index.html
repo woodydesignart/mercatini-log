@@ -210,6 +210,7 @@
 
     .list-item {
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
       gap: 10px;
@@ -224,6 +225,29 @@
       display: flex;
       flex-direction: column;
       gap: 2px;
+    }
+
+    .event-main {
+      flex: 1 1 100%;
+    }
+
+    .event-meta {
+      white-space: nowrap;
+    }
+
+    .event-actions {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .event-actions .price-tag {
+      margin-right: auto;
+      font-size: 0.98rem;
     }
 
     .item-title { font-weight: 700; word-break: break-word; }
@@ -521,7 +545,7 @@
 
     <footer id="floatingFooter" class="app-footer">
       <div class="footer-main">
-        <span>© <span id="footerYear">2026</span> woodydesignart</span>
+        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.0.1</span></span>
         <span aria-hidden="true">•</span>
         <div class="footer-backup-block">
           <span class="footer-backup-note">Salva o ripristina tutti i dati</span>
@@ -597,8 +621,12 @@
   </div>
 
   <script>
+    const APP_VERSION = "v1.0.1";
     const STORAGE_KEY = "mercatini_slide_v3";
-    document.getElementById("footerYear").textContent = new Date().getFullYear();
+
+    document.getElementById("footerYear").textContent = String(new Date().getFullYear());
+    const versionLabel = document.getElementById("appVersionLabel");
+    if (versionLabel) versionLabel.textContent = APP_VERSION;
 
     function todayISO() {
       return new Date().toISOString().slice(0, 10);
@@ -707,6 +735,7 @@
     function exportData() {
       const payload = {
         app: "mercatini-log",
+        version: APP_VERSION,
         exportedAt: new Date().toISOString(),
         data: {
           events: state.events,
@@ -948,11 +977,11 @@
         const row = document.createElement("div");
         row.className = "list-item";
         row.innerHTML = `
-          <div class="item-main">
+          <div class="item-main event-main">
             <div class="item-title">${escapeHtml(evt.name)}</div>
-            <div class="item-sub">${escapeHtml(evt.date || "")} • ${pcs} pezzi</div>
+            <div class="item-sub event-meta">${escapeHtml(evt.date || "")} • ${pcs} pezzi</div>
           </div>
-          <div class="row" style="flex: 0 0 auto; gap: 6px;">
+          <div class="event-actions">
             <span class="price-tag">${formatEuro(total)}</span>
             <button type="button" class="btn-primary" data-action="open">Vendite</button>
             <button type="button" class="btn-danger" data-action="delete">Elimina</button>
