@@ -112,7 +112,7 @@
       width: 100%;
       scroll-snap-align: start;
       padding: 12px;
-      padding-bottom: 48px;
+      padding-bottom: 28px;
     }
 
     .card {
@@ -278,6 +278,17 @@
       padding: 8px 0;
     }
 
+    .status-msg {
+      font-size: 0.84rem;
+      color: var(--ok);
+      margin-top: 8px;
+      min-height: 1.2em;
+    }
+
+    .status-msg.error {
+      color: #ffa8a8;
+    }
+
     /* Modale */
     .modal-backdrop {
       position: fixed;
@@ -318,6 +329,15 @@
       background: var(--surface-2);
       color: var(--muted);
     }
+
+    .app-footer {
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      padding: 12px 14px;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
   </style>
 </head>
 <body>
@@ -353,6 +373,19 @@
         <div class="card">
           <h2>Elenco mercatini</h2>
           <div id="eventsList" class="list"></div>
+        </div>
+
+        <div class="card">
+          <h2>Backup & Trasferimento dati</h2>
+          <div class="item-sub" style="margin-bottom: 10px;">
+            Esporta un file JSON con mercatini, prodotti, vendite e rimpiazzi oppure carica un backup salvato in precedenza.
+          </div>
+          <div class="row">
+            <button type="button" id="exportDataBtn" class="btn-ok">Esporta dati (.json)</button>
+            <button type="button" id="importDataBtn" class="btn-ghost">Carica dati (.json)</button>
+            <input type="file" id="importFileInput" accept="application/json,.json" style="display: none;" />
+          </div>
+          <div id="backupStatus" class="status-msg" role="status"></div>
         </div>
       </section>
 
@@ -413,6 +446,10 @@
         </div>
       </section>
     </main>
+
+    <footer class="app-footer">
+      © <span id="footerYear">2026</span> woodydesignart — Tutti i diritti riservati.
+    </footer>
   </div>
 
   <!-- MODALE CASSA / VENDITA SU UN MERCATINO -->
@@ -465,6 +502,7 @@
 
   <script>
     const STORAGE_KEY = "mercatini_slide_v3";
+    document.getElementById("footerYear").textContent = new Date().getFullYear();
 
     function todayISO() {
       return new Date().toISOString().slice(0, 10);
@@ -488,19 +526,25 @@
     let activePosEventId = null;
     let pendingSaleProduct = null;
 
+    function normalizeState(rawObj) {
+      const base = defaultState();
+      if (!rawObj || typeof rawObj !== "object") return base;
+      return {
+        ...base,
+        ...rawObj,
+        currentSlide: typeof rawObj.currentSlide === "number" ? Math.max(0, Math.min(3, rawObj.currentSlide)) : 0,
+        events: Array.isArray(rawObj.events) ? rawObj.events : [],
+        products: Array.isArray(rawObj.products) ? rawObj.products : base.products,
+        sales: Array.isArray(rawObj.sales) ? rawObj.sales : [],
+        restocks: Array.isArray(rawObj.restocks) ? rawObj.restocks : []
+      };
+    }
+
     function loadState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return defaultState();
-        const parsed = JSON.parse(raw);
-        return {
-          ...defaultState(),
-          ...parsed,
-          events: Array.isArray(parsed.events) ? parsed.events : [],
-          products: Array.isArray(parsed.products) ? parsed.products : defaultState().products,
-          sales: Array.isArray(parsed.sales) ? parsed.sales : [],
-          restocks: Array.isArray(parsed.restocks) ? parsed.restocks : []
-        };
+        return normalizeState(JSON.parse(raw));
       } catch {
         return defaultState();
       }
@@ -508,6 +552,73 @@
 
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function setBackupStatus(msg, isError = false) {
+      const el = document.getElementById("backupStatus");
+      el.textContent = msg;
+      el.classList.toggle("error", isError);
+    }
+
+    function exportData() {
+      const payload = {
+        app: "mercatini-log",
+        exportedAt: new Date().toISOString(),
+        data: {
+          events: state.events,
+          products: state.products,
+          sales: state.sales,
+          restocks: state.restocks
+        }
+      };
+
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `mercatini-backup-${todayISO()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      setBackupStatus("Backup esportato in formato JSON.");
+    }
+
+    function importDataFromFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(String(reader.result || ""));
+          const candidate = parsed && parsed.data && typeof parsed.data === "object" ? parsed.data : parsed;
+
+          if (
+            !Array.isArray(candidate.events) ||
+            !Array.isArray(candidate.products) ||
+            !Array.isArray(candidate.sales) ||
+            !Array.isArray(candidate.restocks)
+          ) {
+            setBackupStatus("File JSON non valido: mancano i dati attesi.", true);
+            return;
+          }
+
+          state = normalizeState({
+            ...state,
+            events: candidate.events,
+            products: candidate.products,
+            sales: candidate.sales,
+            restocks: candidate.restocks
+          });
+          saveState();
+          renderAll();
+          goToSlide(state.currentSlide || 0, false);
+          setBackupStatus(`Dati caricati da "${file.name}".`);
+        } catch {
+          setBackupStatus("Errore nella lettura del file JSON.", true);
+        }
+      };
+      reader.onerror = () => setBackupStatus("Impossibile leggere il file selezionato.", true);
+      reader.readAsText(file);
     }
 
     function formatEuro(val) {
@@ -884,6 +995,17 @@
         renderPosModal();
       }
     }
+
+    // Export / Import
+    document.getElementById("exportDataBtn").onclick = exportData;
+    document.getElementById("importDataBtn").onclick = () => {
+      document.getElementById("importFileInput").value = "";
+      document.getElementById("importFileInput").click();
+    };
+    document.getElementById("importFileInput").onchange = (e) => {
+      const file = e.target.files && e.target.files[0];
+      importDataFromFile(file);
+    };
 
     // Form nuovo mercatino
     document.getElementById("eventDateInput").value = todayISO();
