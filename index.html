@@ -112,7 +112,7 @@
       width: 100%;
       scroll-snap-align: start;
       padding: 12px;
-      padding-bottom: 28px;
+      padding-bottom: 24px;
     }
 
     .card {
@@ -278,17 +278,6 @@
       padding: 8px 0;
     }
 
-    .status-msg {
-      font-size: 0.84rem;
-      color: var(--ok);
-      margin-top: 8px;
-      min-height: 1.2em;
-    }
-
-    .status-msg.error {
-      color: #ffa8a8;
-    }
-
     /* Modale */
     .modal-backdrop {
       position: fixed;
@@ -330,13 +319,58 @@
       color: var(--muted);
     }
 
+    /* Footer discreto con backup compatto */
     .app-footer {
       border-top: 1px solid var(--border);
       background: var(--surface);
-      padding: 12px 14px;
-      text-align: center;
-      font-size: 0.82rem;
+      padding: 10px 14px;
+      font-size: 0.78rem;
       color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-align: center;
+    }
+
+    .footer-main {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .footer-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .footer-link-btn {
+      min-height: 32px;
+      padding: 4px 9px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 600;
+    }
+
+    .footer-link-btn:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    .footer-status {
+      font-size: 0.75rem;
+      color: var(--ok);
+      min-height: 1em;
+    }
+
+    .footer-status.error {
+      color: #ffa8a8;
     }
   </style>
 </head>
@@ -373,19 +407,6 @@
         <div class="card">
           <h2>Elenco mercatini</h2>
           <div id="eventsList" class="list"></div>
-        </div>
-
-        <div class="card">
-          <h2>Backup & Trasferimento dati</h2>
-          <div class="item-sub" style="margin-bottom: 10px;">
-            Esporta un file JSON con mercatini, prodotti, vendite e rimpiazzi oppure carica un backup salvato in precedenza.
-          </div>
-          <div class="row">
-            <button type="button" id="exportDataBtn" class="btn-ok">Esporta dati (.json)</button>
-            <button type="button" id="importDataBtn" class="btn-ghost">Carica dati (.json)</button>
-            <input type="file" id="importFileInput" accept="application/json,.json" style="display: none;" />
-          </div>
-          <div id="backupStatus" class="status-msg" role="status"></div>
         </div>
       </section>
 
@@ -448,7 +469,16 @@
     </main>
 
     <footer class="app-footer">
-      © <span id="footerYear">2026</span> woodydesignart — Tutti i diritti riservati.
+      <div class="footer-main">
+        <span>© <span id="footerYear">2026</span> woodydesignart</span>
+        <span aria-hidden="true">•</span>
+        <div class="footer-actions">
+          <button type="button" id="exportDataBtn" class="footer-link-btn" title="Esporta backup JSON">Esporta JSON</button>
+          <button type="button" id="importDataBtn" class="footer-link-btn" title="Carica backup JSON">Carica JSON</button>
+          <input type="file" id="importFileInput" accept="application/json,.json" style="display: none;" />
+        </div>
+      </div>
+      <div id="backupStatus" class="footer-status" role="status"></div>
     </footer>
   </div>
 
@@ -581,7 +611,7 @@
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      setBackupStatus("Backup esportato in formato JSON.");
+      setBackupStatus("JSON esportato.");
     }
 
     function importDataFromFile(file) {
@@ -598,7 +628,7 @@
             !Array.isArray(candidate.sales) ||
             !Array.isArray(candidate.restocks)
           ) {
-            setBackupStatus("File JSON non valido: mancano i dati attesi.", true);
+            setBackupStatus("File JSON non valido.", true);
             return;
           }
 
@@ -612,12 +642,12 @@
           saveState();
           renderAll();
           goToSlide(state.currentSlide || 0, false);
-          setBackupStatus(`Dati caricati da "${file.name}".`);
+          setBackupStatus(`Caricato "${file.name}".`);
         } catch {
-          setBackupStatus("Errore nella lettura del file JSON.", true);
+          setBackupStatus("Errore nella lettura del JSON.", true);
         }
       };
-      reader.onerror = () => setBackupStatus("Impossibile leggere il file selezionato.", true);
+      reader.onerror = () => setBackupStatus("Impossibile leggere il file.", true);
       reader.readAsText(file);
     }
 
