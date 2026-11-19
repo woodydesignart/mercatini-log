@@ -445,7 +445,7 @@
         <div class="card">
           <h1>Catalogo Pulsanti Prodotti</h1>
           <div class="item-sub" style="margin-bottom: 10px;">
-            Elenco generale condiviso tra tutti i mercatini: aggiungi, modifica o rimuovi pulsanti.
+            Elenco generale ordinato in automatico per frequenza di vendita, condiviso tra tutti i mercatini.
           </div>
           <form id="catalogForm" class="row">
             <input type="hidden" id="editProdId" />
@@ -462,7 +462,7 @@
 
         <div class="card">
           <div class="row" style="margin-bottom: 10px;">
-            <h2 style="margin: 0;">Pulsanti salvati</h2>
+            <h2 style="margin: 0;">Pulsanti salvati (più venduti in alto)</h2>
             <input id="catalogSearch" type="search" placeholder="Filtra prodotti..." style="max-width: 220px; min-height: 36px; padding: 6px 10px;" />
           </div>
           <div id="catalogList" class="list"></div>
@@ -597,6 +597,27 @@
       };
     }
 
+    function getProductSalesCountMap(salesList) {
+      const counts = new Map();
+      (salesList || []).forEach(s => {
+        const key = String(s.productName || "").trim().toLowerCase();
+        if (!key) return;
+        const qty = Math.max(1, parseInt(s.qty, 10) || 1);
+        counts.set(key, (counts.get(key) || 0) + qty);
+      });
+      return counts;
+    }
+
+    function sortProductsByFrequency(list, salesList) {
+      const counts = getProductSalesCountMap(salesList);
+      return [...list].sort((a, b) => {
+        const countA = counts.get(String(a.name || "").trim().toLowerCase()) || 0;
+        const countB = counts.get(String(b.name || "").trim().toLowerCase()) || 0;
+        if (countB !== countA) return countB - countA;
+        return String(a.name || "").localeCompare(String(b.name || ""), "it", { sensitivity: "base" });
+      });
+    }
+
     let state = loadState();
     let activePosEventId = null;
     let pendingSaleProduct = null;
@@ -628,13 +649,15 @@
     function normalizeState(rawObj) {
       const base = defaultState();
       if (!rawObj || typeof rawObj !== "object") return base;
+      const rawProducts = Array.isArray(rawObj.products) ? rawObj.products : base.products;
+      const rawSales = Array.isArray(rawObj.sales) ? rawObj.sales : [];
       return {
         ...base,
         ...rawObj,
         currentSlide: typeof rawObj.currentSlide === "number" ? Math.max(0, Math.min(3, rawObj.currentSlide)) : 0,
         events: Array.isArray(rawObj.events) ? rawObj.events : [],
-        products: Array.isArray(rawObj.products) ? rawObj.products : base.products,
-        sales: Array.isArray(rawObj.sales) ? rawObj.sales : [],
+        products: sortProductsByFrequency(rawProducts, rawSales),
+        sales: rawSales,
         restocks: Array.isArray(rawObj.restocks) ? rawObj.restocks : []
       };
     }
@@ -650,6 +673,7 @@
     }
 
     function saveState() {
+      state.products = sortProductsByFrequency(state.products, state.sales);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
 
@@ -665,7 +689,7 @@
         exportedAt: new Date().toISOString(),
         data: {
           events: state.events,
-          products: state.products,
+          products: sortProductsByFrequency(state.products, state.sales),
           sales: state.sales,
           restocks: state.restocks
         }
@@ -907,7 +931,9 @@
     function renderCatalogSlide() {
       const list = document.getElementById("catalogList");
       const query = (document.getElementById("catalogSearch").value || "").trim().toLowerCase();
-      const filtered = state.products.filter(p => p.name.toLowerCase().includes(query));
+      const counts = getProductSalesCountMap(state.sales);
+      const sorted = sortProductsByFrequency(state.products, state.sales);
+      const filtered = sorted.filter(p => p.name.toLowerCase().includes(query));
 
       list.innerHTML = "";
       if (filtered.length === 0) {
@@ -916,13 +942,15 @@
       }
 
       filtered.forEach(prod => {
+        const soldQty = counts.get(String(prod.name || "").trim().toLowerCase()) || 0;
+        const detailLabel = prod.needsDetail ? "Chiede dettaglio (personaggio)" : "Click rapido diretto";
         const row = document.createElement("div");
         row.className = "list-item";
         row.innerHTML = `
           <div class="item-main">
             <div class="item-title">${escapeHtml(prod.name)}</div>
             <div class="item-price-row"><span class="price-tag">${formatEuro(prod.price)}</span></div>
-            <div class="item-sub">${prod.needsDetail ? "Chiede dettaglio (personaggio)" : "Click rapido diretto"}</div>
+            <div class="item-sub">${detailLabel} • ${soldQty} pz venduti</div>
           </div>
           <div class="row" style="flex: 0 0 auto; gap: 6px;">
             <button type="button" class="btn-ghost" data-action="edit">Modifica</button>
@@ -1050,7 +1078,8 @@
       document.getElementById("posEventStats").textContent = `Totale: ${formatEuro(total)} • ${pcs} pezzi`;
 
       const q = (document.getElementById("posSearch").value || "").trim().toLowerCase();
-      const filtered = state.products.filter(p => p.name.toLowerCase().includes(q));
+      const sorted = sortProductsByFrequency(state.products, state.sales);
+      const filtered = sorted.filter(p => p.name.toLowerCase().includes(q));
       const grid = document.getElementById("posProductsGrid");
       grid.innerHTML = "";
 
@@ -1175,6 +1204,7 @@
         });
       }
 
+      state.products = sortProductsByFrequency(state.products, state.sales);
       resetCatalogForm();
       saveState();
       renderAll();
