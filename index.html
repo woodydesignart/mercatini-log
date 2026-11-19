@@ -114,7 +114,12 @@
       width: 100%;
       scroll-snap-align: start;
       padding: 12px;
-      padding-bottom: 92px;
+      padding-bottom: 84px;
+    }
+
+    .slide:not(.is-active-slide) {
+      max-height: 60dvh;
+      overflow: hidden;
     }
 
     .card {
@@ -469,7 +474,7 @@
 
     <main id="slidesTrack" class="slides-track">
       <!-- SLIDE 0: MERCATINI -->
-      <section class="slide" data-index="0">
+      <section class="slide is-active-slide" data-index="0">
         <div class="card">
           <h1>Nuovo Mercatino</h1>
           <form id="newEventForm" class="row">
@@ -545,7 +550,7 @@
 
     <footer id="floatingFooter" class="app-footer">
       <div class="footer-main">
-        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.0.1</span></span>
+        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.0.2</span></span>
         <span aria-hidden="true">•</span>
         <div class="footer-backup-block">
           <span class="footer-backup-note">Salva o ripristina tutti i dati</span>
@@ -621,7 +626,7 @@
   </div>
 
   <script>
-    const APP_VERSION = "v1.0.1";
+    const APP_VERSION = "v1.0.2";
     const STORAGE_KEY = "mercatini_slide_v3";
 
     document.getElementById("footerYear").textContent = String(new Date().getFullYear());
@@ -811,6 +816,7 @@
 
     // Navigazione slide e footer flottante vicino al fondo
     const track = document.getElementById("slidesTrack");
+    const slides = [...document.querySelectorAll(".slide")];
     const tabs = [...document.querySelectorAll(".nav-tab")];
     const dots = [...document.querySelectorAll(".dot")];
     const floatingFooter = document.getElementById("floatingFooter");
@@ -819,15 +825,18 @@
       const docEl = document.documentElement;
       const scrollTop = window.scrollY || docEl.scrollTop || document.body.scrollTop || 0;
       const viewportHeight = window.innerHeight || docEl.clientHeight || 0;
-      const docHeight = Math.max(docEl.scrollHeight, document.body.scrollHeight);
+      const activeSlideEl = slides[state.currentSlide];
+      const activeBottom = activeSlideEl
+        ? activeSlideEl.offsetTop + activeSlideEl.offsetHeight
+        : Math.max(docEl.scrollHeight, document.body.scrollHeight);
 
-      if (docHeight <= viewportHeight + 24) {
-        floatingFooter.classList.add("visible");
+      if (activeBottom <= viewportHeight + 24) {
+        floatingFooter.classList.toggle("visible", scrollTop >= 12 || activeBottom <= viewportHeight);
         return;
       }
 
-      const distanceFromBottom = docHeight - (scrollTop + viewportHeight);
-      floatingFooter.classList.toggle("visible", distanceFromBottom <= 80);
+      const distanceFromBottom = activeBottom - (scrollTop + viewportHeight);
+      floatingFooter.classList.toggle("visible", distanceFromBottom <= 140);
     }
 
     function scrollPageToTop() {
@@ -835,6 +844,12 @@
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
       updateFloatingFooterVisibility();
+    }
+
+    function updateSlideIndicators(index) {
+      tabs.forEach((t, i) => t.classList.toggle("active", i === index));
+      dots.forEach((d, i) => d.classList.toggle("active", i === index));
+      slides.forEach((s, i) => s.classList.toggle("is-active-slide", i === index));
     }
 
     function goToSlide(index, smooth = true) {
@@ -847,11 +862,6 @@
         left: clamped * track.clientWidth,
         behavior: smooth ? "smooth" : "auto"
       });
-    }
-
-    function updateSlideIndicators(index) {
-      tabs.forEach((t, i) => t.classList.toggle("active", i === index));
-      dots.forEach((d, i) => d.classList.toggle("active", i === index));
     }
 
     tabs.forEach(tab => {
