@@ -358,6 +358,19 @@
       gap: 10px;
     }
 
+    .footer-backup-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .footer-backup-note {
+      font-size: 0.71rem;
+      color: var(--muted);
+      line-height: 1.25;
+    }
+
     .footer-actions {
       display: inline-flex;
       align-items: center;
@@ -489,10 +502,13 @@
       <div class="footer-main">
         <span>© <span id="footerYear">2026</span> woodydesignart</span>
         <span aria-hidden="true">•</span>
-        <div class="footer-actions">
-          <button type="button" id="exportDataBtn" class="footer-link-btn" title="Esporta backup JSON">Esporta JSON</button>
-          <button type="button" id="importDataBtn" class="footer-link-btn" title="Carica backup JSON">Carica JSON</button>
-          <input type="file" id="importFileInput" accept="application/json,.json" style="display: none;" />
+        <div class="footer-backup-block">
+          <span class="footer-backup-note">Salva o ripristina tutti i dati</span>
+          <div class="footer-actions">
+            <button type="button" id="exportDataBtn" class="footer-link-btn" title="Esporta backup JSON">Esporta JSON</button>
+            <button type="button" id="importDataBtn" class="footer-link-btn" title="Carica backup JSON">Carica JSON</button>
+            <input type="file" id="importFileInput" accept="application/json,.json" style="display: none;" />
+          </div>
         </div>
       </div>
       <div id="backupStatus" class="footer-status" role="status"></div>
