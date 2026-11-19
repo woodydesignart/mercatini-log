@@ -6,17 +6,18 @@
   <title>Mercatini Log</title>
   <style>
     :root {
-      --bg: #121316;
-      --surface: #1b1d22;
-      --surface-2: #24272e;
-      --text: #f1f3f5;
-      --muted: #9aa0a6;
+      --bg: #111317;
+      --surface: #191c22;
+      --surface-2: #22262f;
+      --surface-3: #2b303c;
+      --text: #f3f5f7;
+      --muted: #9aa2b1;
       --accent: #4dabf7;
-      --accent-text: #0b192c;
+      --accent-text: #091526;
       --ok: #51cf66;
       --warn: #fcc419;
       --danger: #ff6b6b;
-      --border: #2e323b;
+      --border: #2f3542;
       --radius: 12px;
     }
 
@@ -28,13 +29,13 @@
       background: var(--bg);
       color: var(--text);
       line-height: 1.4;
-      padding-bottom: 48px;
+      padding-bottom: 40px;
     }
 
-    .container {
-      max-width: 780px;
+    .app {
+      max-width: 820px;
       margin: 0 auto;
-      padding: 14px;
+      padding: 12px;
     }
 
     .card {
@@ -42,16 +43,21 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 14px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     h1, h2, h3 {
       margin: 0 0 10px 0;
-      font-weight: 600;
+      font-weight: 700;
     }
 
-    h1 { font-size: 1.2rem; }
-    h2 { font-size: 1rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    h1 { font-size: 1.15rem; }
+    h2 {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
 
     .row {
       display: flex;
@@ -77,7 +83,7 @@
     button {
       cursor: pointer;
       font-weight: 600;
-      transition: transform 0.06s ease, opacity 0.15s ease, background 0.15s ease;
+      transition: transform 0.06s ease, background 0.15s ease, border-color 0.15s ease;
     }
 
     button:active { transform: scale(0.98); }
@@ -96,7 +102,7 @@
 
     .btn-danger {
       background: rgba(255, 107, 107, 0.14);
-      border-color: rgba(255, 107, 107, 0.4);
+      border-color: rgba(255, 107, 107, 0.42);
       color: #ffa8a8;
       min-height: 36px;
       padding: 6px 10px;
@@ -104,43 +110,98 @@
     }
 
     .btn-ghost {
-      background: transparent;
-      color: var(--muted);
-      min-height: 36px;
-      padding: 6px 10px;
-      font-size: 0.85rem;
-    }
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .kpi {
       background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px;
+      color: var(--text);
+      min-height: 38px;
+      padding: 6px 12px;
+      font-size: 0.88rem;
     }
 
-    .kpi .label { font-size: 0.78rem; color: var(--muted); }
-    .kpi .value { font-size: 1.25rem; font-weight: 700; margin-top: 2px; }
+    .btn-ghost.active {
+      background: var(--accent);
+      color: var(--accent-text);
+      border-color: var(--accent);
+    }
+
+    /* Barra evento attivo stile palmare */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(25, 28, 34, 0.96);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .topbar-title {
+      font-weight: 700;
+      font-size: 1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .topbar-sub {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .topbar-total {
+      text-align: right;
+      flex: 0 0 auto;
+    }
+
+    .topbar-total .amount {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--ok);
+    }
+
+    /* Griglia pulsanti stile palmare */
+    .pos-toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pos-toolbar input {
+      flex: 1 1 180px;
+    }
 
     .products-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
       gap: 10px;
     }
 
+    .product-card-wrap {
+      position: relative;
+      display: flex;
+    }
+
     .product-btn {
+      width: 100%;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       align-items: flex-start;
       text-align: left;
-      min-height: 84px;
+      min-height: 88px;
       padding: 12px;
       background: var(--surface-2);
       border: 1px solid var(--border);
@@ -149,18 +210,61 @@
 
     .product-btn:hover { border-color: var(--accent); }
 
-    .product-name { font-size: 1rem; font-weight: 700; }
+    .product-name {
+      font-size: 0.98rem;
+      font-weight: 700;
+      padding-right: 18px;
+    }
+
     .product-meta {
       width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 8px;
-      font-size: 0.88rem;
+      margin-top: 10px;
+      font-size: 0.84rem;
       color: var(--muted);
     }
 
-    .price-tag { color: var(--ok); font-weight: 700; }
+    .price-tag {
+      color: var(--ok);
+      font-weight: 700;
+    }
+
+    .remove-prod-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      min-height: 28px;
+      width: 28px;
+      padding: 0;
+      border-radius: 8px;
+      background: rgba(255, 107, 107, 0.2);
+      border-color: rgba(255, 107, 107, 0.5);
+      color: #ffa8a8;
+      font-size: 0.85rem;
+      line-height: 1;
+    }
+
+    .subtabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .subtab-btn {
+      min-height: 44px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .subtab-btn.active {
+      background: var(--surface-3);
+      border-color: var(--accent);
+      color: var(--text);
+    }
 
     .list {
       display: flex;
@@ -179,8 +283,16 @@
       padding: 10px 12px;
     }
 
+    .event-item {
+      cursor: pointer;
+    }
+
+    .event-item:hover {
+      border-color: var(--accent);
+    }
+
     .item-main { min-width: 0; }
-    .item-title { font-weight: 600; word-break: break-word; }
+    .item-title { font-weight: 700; word-break: break-word; }
     .item-sub { font-size: 0.82rem; color: var(--muted); }
 
     .badge {
@@ -198,19 +310,19 @@
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.72);
+      background: rgba(0, 0, 0, 0.74);
       display: none;
       align-items: center;
       justify-content: center;
       padding: 16px;
-      z-index: 50;
+      z-index: 60;
     }
 
     .modal-backdrop.open { display: flex; }
 
     .modal {
       width: 100%;
-      max-width: 440px;
+      max-width: 450px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -239,144 +351,176 @@
       padding: 8px 0;
     }
 
+    .hidden { display: none !important; }
+
     @media (max-width: 520px) {
-      .kpi-grid { grid-template-columns: 1fr; }
-      .products-grid { grid-template-columns: 1fr 1fr; }
+      .products-grid { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- EVENTO ATTIVO E RIEPILOGO -->
-    <div class="card">
-      <h1>Gestione Vendite Mercatini</h1>
-      <div class="row" style="margin-bottom: 10px;">
-        <select id="eventSelect" aria-label="Seleziona evento"></select>
-        <button id="newEventBtn" class="btn-primary" type="button">+ Nuovo Mercatino</button>
-      </div>
-      <div class="row">
-        <input id="newEventName" type="text" placeholder="Nome evento (es. Mercatino Vintage Domenica)" />
-        <input id="newEventDate" type="date" style="max-width: 170px;" />
-        <button id="createEventConfirm" class="btn-ok" type="button">Crea</button>
+  <div class="app">
+    <!-- SCHERMATA 1: ELENCO MERCATINI -->
+    <section id="eventsScreen">
+      <div class="card">
+        <h1>Nuovo Mercatino</h1>
+        <form id="newEventForm" class="row">
+          <input id="eventNameInput" type="text" placeholder="Nome mercatino (es. Mercatino Maggio)" required />
+          <input id="eventDateInput" type="date" style="max-width: 165px;" required />
+          <button type="submit" class="btn-primary">+ Crea e apri</button>
+        </form>
       </div>
 
-      <div class="kpi-grid">
-        <div class="kpi">
-          <div class="label">Incasso evento</div>
-          <div id="kpiTotal" class="value">0,00 €</div>
+      <div class="card">
+        <h2>Mercatini salvati</h2>
+        <div id="eventsList" class="list"></div>
+      </div>
+    </section>
+
+    <!-- SCHERMATA 2: DETTAGLIO MERCATINO (STILE PALMARE) -->
+    <section id="eventDetailScreen" class="hidden">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button id="backToEventsBtn" type="button" class="btn-ghost">← Mercatini</button>
+          <div style="min-width: 0;">
+            <div id="activeEventTitle" class="topbar-title">Evento</div>
+            <div id="activeEventMeta" class="topbar-sub">0 pezzi</div>
+          </div>
         </div>
-        <div class="kpi">
-          <div class="label">Pezzi venduti</div>
-          <div id="kpiCount" class="value">0</div>
-        </div>
-        <div class="kpi">
-          <div class="label">Da rimpiazzare</div>
-          <div id="kpiRestock" class="value">0</div>
+        <div class="topbar-total">
+          <div class="topbar-sub">Totale</div>
+          <div id="activeEventTotal" class="amount">0,00 €</div>
         </div>
       </div>
-    </div>
 
-    <!-- PULSANTI RAPIDI PRODOTTI -->
-    <div class="card">
-      <h2>Vendita rapida</h2>
-      <div id="productsGrid" class="products-grid"></div>
-    </div>
-
-    <!-- CONFIGURA PRODOTTO / AGGIUNGI NUOVO -->
-    <div class="card">
-      <h2>Imposta prezzo o aggiungi prodotto</h2>
-      <form id="productForm" class="row">
-        <input id="prodName" type="text" placeholder="Nome prodotto (es. Segnalibri)" required />
-        <input id="prodPrice" type="number" step="0.01" min="0" placeholder="Prezzo €" style="max-width: 120px;" required />
-        <select id="prodNeedsDetail" style="max-width: 210px;">
-          <option value="true">Chiede dettaglio (es. personaggio)</option>
-          <option value="false">Vendita diretta senza dettaglio</option>
-        </select>
-        <button type="submit" class="btn-primary">Salva prodotto</button>
-      </form>
-      <div class="item-sub" style="margin-top: 8px;">
-        Suggerimento: se inserisci il nome di un prodotto già esistente, aggiorni il suo prezzo memorizzato per i prossimi click.
+      <!-- SEZIONE PULSANTI PRODOTTI (GLOBALE, SEMPRE ACCESSIBILE NELLA SCHERMATA MERCATINO) -->
+      <div class="card">
+        <h2>Pulsanti prodotti</h2>
+        <div class="pos-toolbar">
+          <input id="productSearchInput" type="search" placeholder="Cerca prodotto..." />
+          <button id="openAddProductBtn" type="button" class="btn-primary">+ Prodotto</button>
+          <button id="toggleRemoveModeBtn" type="button" class="btn-ghost">Rimuovi</button>
+        </div>
+        <div id="productsGrid" class="products-grid"></div>
       </div>
-    </div>
 
-    <!-- ELENCO RIMPIAZZI DA FARE -->
-    <div class="card">
-      <h2>Elenco rimpiazzi da fare</h2>
-      <div id="restockList" class="list"></div>
-    </div>
+      <!-- SWITCHER VENDITE / RIMPIAZZI DEL MERCATINO ATTIVO -->
+      <div class="subtabs">
+        <button id="tabSalesBtn" type="button" class="subtab-btn active">Vendite & Totale</button>
+        <button id="tabRestocksBtn" type="button" class="subtab-btn">Rimpiazzi (<span id="restockCountBadge">0</span>)</button>
+      </div>
 
-    <!-- ELENCO VENDITE EVENTO CORRENTE -->
-    <div class="card">
-      <h2>Vendite dell'evento</h2>
-      <div id="salesList" class="list"></div>
-    </div>
+      <!-- VISTA VENDITE E TOTALE -->
+      <div id="salesPanel" class="card">
+        <div class="row" style="margin-bottom: 10px;">
+          <h2 style="margin: 0;">Storico vendite mercatino</h2>
+          <span id="salesSummaryText" class="item-sub" style="flex: 0 0 auto;"></span>
+        </div>
+        <div id="salesList" class="list"></div>
+      </div>
 
-    <!-- STORICO EVENTI DELL'ANNO -->
-    <div class="card">
-      <h2>Storico eventi</h2>
-      <div id="historyList" class="list"></div>
-    </div>
+      <!-- VISTA RIMPIAZZI -->
+      <div id="restocksPanel" class="card hidden">
+        <h2>Elenco rimpiazzi mercatino</h2>
+        <div id="restocksList" class="list"></div>
+      </div>
+    </section>
   </div>
 
-  <!-- MODALE DETTAGLIO VENDITA -->
-  <div id="saleModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <!-- MODALE VENDITA CON DETTAGLIO -->
+  <div id="saleModal" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal">
-      <h3 id="modalTitle">Dettaglio vendita</h3>
+      <h3 id="saleModalTitle">Vendita</h3>
       <form id="saleModalForm">
         <div class="row" style="margin-bottom: 10px;">
           <div style="flex: 1;">
-            <label for="modalPrice" class="item-sub" style="display:block; margin-bottom:4px;">Prezzo (€)</label>
-            <input id="modalPrice" type="number" step="0.01" min="0" required style="width: 100%;" />
+            <label for="saleModalPrice" class="item-sub" style="display:block; margin-bottom:4px;">Prezzo unitario (€)</label>
+            <input id="saleModalPrice" type="number" step="0.01" min="0" required style="width: 100%;" />
           </div>
-          <div style="max-width: 110px;">
-            <label for="modalQty" class="item-sub" style="display:block; margin-bottom:4px;">Quantità</label>
-            <input id="modalQty" type="number" min="1" value="1" required style="width: 100%;" />
+          <div style="max-width: 105px;">
+            <label for="saleModalQty" class="item-sub" style="display:block; margin-bottom:4px;">Quantità</label>
+            <input id="saleModalQty" type="number" min="1" value="1" required style="width: 100%;" />
           </div>
         </div>
 
-        <label for="modalDetail" class="item-sub" style="display:block; margin-bottom:4px;">Personaggio / Dettaglio (va nei rimpiazzi)</label>
-        <input id="modalDetail" type="text" placeholder="Es. Batman, Frida, Gatto..." style="width: 100%;" />
+        <label for="saleModalDetail" class="item-sub" style="display:block; margin-bottom:4px;">Personaggio / Dettaglio (va nei rimpiazzi)</label>
+        <input id="saleModalDetail" type="text" placeholder="Es. Batman, Frida, Gatto..." style="width: 100%;" />
 
         <div id="recentDetailsChips" class="chips"></div>
 
         <div class="row" style="margin-top: 12px;">
-          <button type="button" id="modalCancel" class="btn-ghost">Annulla</button>
-          <button type="submit" class="btn-ok">Registra vendita</button>
+          <button type="button" id="cancelSaleModalBtn" class="btn-ghost">Annulla</button>
+          <button type="submit" class="btn-ok">Segna vendita</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODALE AGGIUNGI PRODOTTO AL CATALOGO GLOBALE -->
+  <div id="addProductModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal">
+      <h3>Nuovo pulsante prodotto</h3>
+      <form id="addProductForm">
+        <div style="margin-bottom: 10px;">
+          <label for="newProdName" class="item-sub" style="display:block; margin-bottom:4px;">Nome prodotto</label>
+          <input id="newProdName" type="text" placeholder="Es. Segnalibri" required style="width: 100%;" />
+        </div>
+        <div class="row" style="margin-bottom: 12px;">
+          <div style="flex: 1;">
+            <label for="newProdPrice" class="item-sub" style="display:block; margin-bottom:4px;">Prezzo memorizzato (€)</label>
+            <input id="newProdPrice" type="number" step="0.01" min="0" placeholder="3.00" required style="width: 100%;" />
+          </div>
+          <div style="flex: 1.3;">
+            <label for="newProdDetail" class="item-sub" style="display:block; margin-bottom:4px;">Comportamento</label>
+            <select id="newProdDetail" style="width: 100%;">
+              <option value="true">Chiede dettaglio (es. personaggio)</option>
+              <option value="false">Click rapido diretto</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <button type="button" id="cancelAddProductBtn" class="btn-ghost">Annulla</button>
+          <button type="submit" class="btn-primary">Aggiungi al catalogo</button>
         </div>
       </form>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = "mercatini_log_v1";
+    const STORAGE_KEY = "mercatini_pos_v2";
 
-    const defaultState = () => {
-      const today = new Date().toISOString().slice(0, 10);
-      const initialEventId = "evt_" + Date.now();
+    function todayISO() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function defaultState() {
+      const evtId = "evt_" + Date.now();
       return {
-        activeEventId: initialEventId,
+        view: "events", // "events" | "detail"
+        activeSubtab: "sales", // "sales" | "restocks"
+        activeEventId: evtId,
         events: [
-          { id: initialEventId, name: "Mercatino di Prova", date: today }
+          { id: evtId, name: "Mercatino Maggio", date: todayISO() }
         ],
         products: [
-          { id: "p_segnalibri", name: "Segnalibri", price: 3.00, needsDetail: true },
-          { id: "p_portachiavi", name: "Portachiavi", price: 5.00, needsDetail: true },
-          { id: "p_stampe", name: "Stampe A5", price: 8.00, needsDetail: false }
+          { id: "p_segnalibri", name: "Segnalibri", price: 3.0, needsDetail: true },
+          { id: "p_portachiavi", name: "Portachiavi", price: 5.0, needsDetail: true },
+          { id: "p_stampe", name: "Stampe A5", price: 8.0, needsDetail: false }
         ],
         sales: [],
-        restocks: [] // { id, eventId, productName, detail, qty }
+        restocks: []
       };
-    };
+    }
 
     let state = loadState();
-    let pendingProduct = null;
+    let removeMode = false;
+    let pendingSaleProduct = null;
 
     function loadState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return defaultState();
-        const parsed = JSON.parse(raw);
-        return { ...defaultState(), ...parsed };
+        return { ...defaultState(), ...JSON.parse(raw) };
       } catch {
         return defaultState();
       }
@@ -386,22 +530,47 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
 
-    function formatEuro(num) {
-      return (Number(num) || 0).toLocaleString("it-IT", {
+    function formatEuro(val) {
+      return (Number(val) || 0).toLocaleString("it-IT", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       }) + " €";
     }
 
-    function getActiveEvent() {
-      return state.events.find(e => e.id === state.activeEventId) || state.events[0];
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
     }
 
-    function addSale({ product, price, qty, detail }) {
+    function getActiveEvent() {
+      return state.events.find(e => e.id === state.activeEventId) || state.events[0] || null;
+    }
+
+    function openEvent(eventId) {
+      state.activeEventId = eventId;
+      state.view = "detail";
+      removeMode = false;
+      saveState();
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function registerSale({ product, price, qty, detail }) {
       const evt = getActiveEvent();
+      if (!evt) return;
+
       const cleanPrice = Math.max(0, Number(price) || 0);
       const cleanQty = Math.max(1, parseInt(qty, 10) || 1);
       const cleanDetail = (detail || "").trim();
+
+      // Memorizza eventuale nuovo prezzo sul prodotto globale
+      const prodRef = state.products.find(p => p.id === product.id);
+      if (prodRef) {
+        prodRef.price = cleanPrice;
+      }
 
       state.sales.unshift({
         id: "s_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
@@ -414,11 +583,11 @@
         total: cleanPrice * cleanQty
       });
 
-      // Aggiorna elenco rimpiazzi per l'evento attivo
       const existingRestock = state.restocks.find(
-        r => r.eventId === evt.id &&
-             r.productName.toLowerCase() === product.name.toLowerCase() &&
-             (r.detail || "").toLowerCase() === cleanDetail.toLowerCase()
+        r =>
+          r.eventId === evt.id &&
+          r.productName.toLowerCase() === product.name.toLowerCase() &&
+          (r.detail || "").toLowerCase() === cleanDetail.toLowerCase()
       );
 
       if (existingRestock) {
@@ -437,108 +606,212 @@
       render();
     }
 
-    function openSaleFlow(product) {
-      if (product.needsDetail) {
-        pendingProduct = product;
-        document.getElementById("modalTitle").textContent = `Vendita: ${product.name}`;
-        document.getElementById("modalPrice").value = Number(product.price).toFixed(2);
-        document.getElementById("modalQty").value = 1;
-        document.getElementById("modalDetail").value = "";
+    function handleProductClick(product) {
+      if (removeMode) {
+        state.products = state.products.filter(p => p.id !== product.id);
+        saveState();
+        render();
+        return;
+      }
 
-        // Chip rapidi con dettagli già usati per questo prodotto
-        const chipsBox = document.getElementById("recentDetailsChips");
-        chipsBox.innerHTML = "";
-        const usedDetails = [...new Set(
+      if (product.needsDetail) {
+        pendingSaleProduct = product;
+        document.getElementById("saleModalTitle").textContent = `${product.name}`;
+        document.getElementById("saleModalPrice").value = Number(product.price).toFixed(2);
+        document.getElementById("saleModalQty").value = 1;
+        document.getElementById("saleModalDetail").value = "";
+
+        const chips = document.getElementById("recentDetailsChips");
+        chips.innerHTML = "";
+        const previousDetails = [...new Set(
           state.sales
             .filter(s => s.productName.toLowerCase() === product.name.toLowerCase() && s.detail)
             .map(s => s.detail)
         )].slice(0, 8);
 
-        usedDetails.forEach(d => {
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "chip";
-          btn.textContent = d;
-          btn.onclick = () => {
-            document.getElementById("modalDetail").value = d;
+        previousDetails.forEach(d => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "chip";
+          b.textContent = d;
+          b.onclick = () => {
+            document.getElementById("saleModalDetail").value = d;
           };
-          chipsBox.appendChild(btn);
+          chips.appendChild(b);
         });
 
         document.getElementById("saleModal").classList.add("open");
-        document.getElementById("modalDetail").focus();
+        document.getElementById("saleModalDetail").focus();
       } else {
-        addSale({ product, price: product.price, qty: 1, detail: "" });
+        registerSale({ product, price: product.price, qty: 1, detail: "" });
       }
     }
 
-    function closeSaleModal() {
-      pendingProduct = null;
-      document.getElementById("saleModal").classList.remove("open");
+    function render() {
+      const eventsScreen = document.getElementById("eventsScreen");
+      const detailScreen = document.getElementById("eventDetailScreen");
+
+      if (state.view === "events" || !getActiveEvent()) {
+        eventsScreen.classList.remove("hidden");
+        detailScreen.classList.add("hidden");
+        renderEventsList();
+        return;
+      }
+
+      eventsScreen.classList.add("hidden");
+      detailScreen.classList.remove("hidden");
+      renderEventDetail();
     }
 
-    function render() {
-      const evt = getActiveEvent();
+    function renderEventsList() {
+      const list = document.getElementById("eventsList");
+      list.innerHTML = "";
 
-      // Selettore eventi
-      const eventSelect = document.getElementById("eventSelect");
-      eventSelect.innerHTML = "";
-      state.events.forEach(e => {
-        const opt = document.createElement("option");
-        opt.value = e.id;
-        opt.textContent = `${e.name} (${e.date || "senza data"})`;
-        if (e.id === evt.id) opt.selected = true;
-        eventSelect.appendChild(opt);
-      });
+      if (state.events.length === 0) {
+        list.innerHTML = `<div class="empty">Nessun mercatino creato. Crea il primo qui sopra.</div>`;
+        return;
+      }
 
-      const eventSales = state.sales.filter(s => s.eventId === evt.id);
-      const eventRestocks = state.restocks.filter(r => r.eventId === evt.id && r.qty > 0);
+      state.events.forEach(evt => {
+        const evtSales = state.sales.filter(s => s.eventId === evt.id);
+        const total = evtSales.reduce((sum, s) => sum + s.total, 0);
+        const pieces = evtSales.reduce((sum, s) => sum + s.qty, 0);
 
-      const totalRevenue = eventSales.reduce((acc, s) => acc + s.total, 0);
-      const totalItems = eventSales.reduce((acc, s) => acc + s.qty, 0);
-      const totalRestockItems = eventRestocks.reduce((acc, r) => acc + r.qty, 0);
-
-      document.getElementById("kpiTotal").textContent = formatEuro(totalRevenue);
-      document.getElementById("kpiCount").textContent = totalItems;
-      document.getElementById("kpiRestock").textContent = totalRestockItems;
-
-      // Pulsanti rapidi prodotti
-      const grid = document.getElementById("productsGrid");
-      grid.innerHTML = "";
-      state.products.forEach(prod => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "product-btn";
-        btn.innerHTML = `
-          <div class="product-name">${escapeHtml(prod.name)}</div>
-          <div class="product-meta">
-            <span class="price-tag">${formatEuro(prod.price)}</span>
-            <span>${prod.needsDetail ? "+ dettaglio" : "rapido"}</span>
+        const item = document.createElement("div");
+        item.className = "list-item event-item";
+        item.innerHTML = `
+          <div class="item-main">
+            <div class="item-title">${escapeHtml(evt.name)}</div>
+            <div class="item-sub">${escapeHtml(evt.date || "")} • ${pieces} pezzi venduti</div>
+          </div>
+          <div class="row" style="flex: 0 0 auto; gap: 8px;">
+            <span class="price-tag">${formatEuro(total)}</span>
+            <button type="button" class="btn-ghost">Apri</button>
           </div>
         `;
-        btn.onclick = () => openSaleFlow(prod);
-        grid.appendChild(btn);
+        item.onclick = () => openEvent(evt.id);
+        list.appendChild(item);
       });
+    }
 
-      // Elenco rimpiazzi
-      const restockList = document.getElementById("restockList");
-      restockList.innerHTML = "";
-      if (eventRestocks.length === 0) {
-        restockList.innerHTML = `<div class="empty">Nessun pezzo da rimpiazzare per questo evento.</div>`;
+    function renderEventDetail() {
+      const evt = getActiveEvent();
+      const evtSales = state.sales.filter(s => s.eventId === evt.id);
+      const evtRestocks = state.restocks.filter(r => r.eventId === evt.id && r.qty > 0);
+
+      const total = evtSales.reduce((sum, s) => sum + s.total, 0);
+      const pieces = evtSales.reduce((sum, s) => sum + s.qty, 0);
+      const restockPieces = evtRestocks.reduce((sum, r) => sum + r.qty, 0);
+
+      document.getElementById("activeEventTitle").textContent = evt.name;
+      document.getElementById("activeEventMeta").textContent = `${evt.date || ""} • ${pieces} pezzi`;
+      document.getElementById("activeEventTotal").textContent = formatEuro(total);
+      document.getElementById("restockCountBadge").textContent = restockPieces;
+      document.getElementById("salesSummaryText").textContent = `Totale: ${formatEuro(total)} (${pieces} pz)`;
+
+      // Toggle modalità rimozione prodotti
+      const removeBtn = document.getElementById("toggleRemoveModeBtn");
+      removeBtn.classList.toggle("active", removeMode);
+      removeBtn.textContent = removeMode ? "Fine rimozione" : "Rimuovi";
+
+      // Pulsanti prodotti con ricerca
+      const query = (document.getElementById("productSearchInput").value || "").trim().toLowerCase();
+      const filteredProducts = state.products.filter(p => p.name.toLowerCase().includes(query));
+      const grid = document.getElementById("productsGrid");
+      grid.innerHTML = "";
+
+      if (filteredProducts.length === 0) {
+        grid.innerHTML = `<div class="empty">Nessun prodotto trovato.</div>`;
       } else {
-        eventRestocks.forEach(r => {
+        filteredProducts.forEach(prod => {
+          const wrap = document.createElement("div");
+          wrap.className = "product-card-wrap";
+
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "product-btn";
+          btn.innerHTML = `
+            <div class="product-name">${escapeHtml(prod.name)}</div>
+            <div class="product-meta">
+              <span class="price-tag">${formatEuro(prod.price)}</span>
+              <span>${prod.needsDetail ? "+ dettaglio" : "rapido"}</span>
+            </div>
+          `;
+          btn.onclick = () => handleProductClick(prod);
+          wrap.appendChild(btn);
+
+          if (removeMode) {
+            const delBtn = document.createElement("button");
+            delBtn.type = "button";
+            delBtn.className = "remove-prod-btn";
+            delBtn.title = "Rimuovi prodotto";
+            delBtn.textContent = "×";
+            delBtn.onclick = (e) => {
+              e.stopPropagation();
+              state.products = state.products.filter(p => p.id !== prod.id);
+              saveState();
+              render();
+            };
+            wrap.appendChild(delBtn);
+          }
+
+          grid.appendChild(wrap);
+        });
+      }
+
+      // Subtab attivi
+      const isSales = state.activeSubtab === "sales";
+      document.getElementById("tabSalesBtn").classList.toggle("active", isSales);
+      document.getElementById("tabRestocksBtn").classList.toggle("active", !isSales);
+      document.getElementById("salesPanel").classList.toggle("hidden", !isSales);
+      document.getElementById("restocksPanel").classList.toggle("hidden", isSales);
+
+      // Storico vendite del mercatino
+      const salesList = document.getElementById("salesList");
+      salesList.innerHTML = "";
+      if (evtSales.length === 0) {
+        salesList.innerHTML = `<div class="empty">Nessuna vendita registrata in questo mercatino.</div>`;
+      } else {
+        evtSales.forEach(s => {
           const row = document.createElement("div");
           row.className = "list-item";
-          const labelDetail = r.detail ? ` — <strong>${escapeHtml(r.detail)}</strong>` : "";
+          const time = new Date(s.timestamp).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+          const detailInfo = s.detail ? ` • <strong>${escapeHtml(s.detail)}</strong>` : "";
           row.innerHTML = `
             <div class="item-main">
-              <div class="item-title">${escapeHtml(r.productName)}${labelDetail}</div>
-              <div class="item-sub">Da rifare / rifornire</div>
+              <div class="item-title">${escapeHtml(s.productName)} x${s.qty} — <span class="price-tag">${formatEuro(s.total)}</span></div>
+              <div class="item-sub">${time}${detailInfo}</div>
+            </div>
+            <button type="button" class="btn-danger">Elimina</button>
+          `;
+          row.querySelector("button").onclick = () => {
+            state.sales = state.sales.filter(item => item.id !== s.id);
+            saveState();
+            render();
+          };
+          salesList.appendChild(row);
+        });
+      }
+
+      // Rimpiazzi del mercatino
+      const restocksList = document.getElementById("restocksList");
+      restocksList.innerHTML = "";
+      if (evtRestocks.length === 0) {
+        restocksList.innerHTML = `<div class="empty">Nessun pezzo da rimpiazzare per questo mercatino.</div>`;
+      } else {
+        evtRestocks.forEach(r => {
+          const row = document.createElement("div");
+          row.className = "list-item";
+          const detailText = r.detail ? ` — <strong>${escapeHtml(r.detail)}</strong>` : "";
+          row.innerHTML = `
+            <div class="item-main">
+              <div class="item-title">${escapeHtml(r.productName)}${detailText}</div>
+              <div class="item-sub">Da rimpiazzare</div>
             </div>
             <div class="row" style="flex: 0 0 auto; gap: 6px;">
               <span class="badge">x${r.qty}</span>
-              <button type="button" class="btn-ghost" title="Segna 1 rimpiazzato">-1</button>
-              <button type="button" class="btn-danger" title="Rimuovi riga">Fatto</button>
+              <button type="button" class="btn-ghost">-1</button>
+              <button type="button" class="btn-danger">Fatto</button>
             </div>
           `;
           const [minusBtn, doneBtn] = row.querySelectorAll("button");
@@ -553,113 +826,94 @@
             saveState();
             render();
           };
-          restockList.appendChild(row);
+          restocksList.appendChild(row);
         });
       }
-
-      // Vendite evento
-      const salesList = document.getElementById("salesList");
-      salesList.innerHTML = "";
-      if (eventSales.length === 0) {
-        salesList.innerHTML = `<div class="empty">Nessuna vendita registrata in questo mercatino.</div>`;
-      } else {
-        eventSales.forEach(s => {
-          const row = document.createElement("div");
-          row.className = "list-item";
-          const timeStr = new Date(s.timestamp).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
-          const detailStr = s.detail ? ` • Dettaglio: <strong>${escapeHtml(s.detail)}</strong>` : "";
-          row.innerHTML = `
-            <div class="item-main">
-              <div class="item-title">${escapeHtml(s.productName)} (x${s.qty}) — <span class="price-tag">${formatEuro(s.total)}</span></div>
-              <div class="item-sub">${timeStr}${detailStr}</div>
-            </div>
-            <button type="button" class="btn-danger">Elimina</button>
-          `;
-          row.querySelector("button").onclick = () => {
-            state.sales = state.sales.filter(item => item.id !== s.id);
-            saveState();
-            render();
-          };
-          salesList.appendChild(row);
-        });
-      }
-
-      // Storico eventi
-      const historyList = document.getElementById("historyList");
-      historyList.innerHTML = "";
-      state.events.forEach(e => {
-        const sForEvt = state.sales.filter(s => s.eventId === e.id);
-        const rev = sForEvt.reduce((acc, item) => acc + item.total, 0);
-        const pcs = sForEvt.reduce((acc, item) => acc + item.qty, 0);
-        const row = document.createElement("div");
-        row.className = "list-item";
-        row.innerHTML = `
-          <div class="item-main">
-            <div class="item-title">${escapeHtml(e.name)}</div>
-            <div class="item-sub">${e.date || "Data non impostata"} • ${pcs} pezzi venduti</div>
-          </div>
-          <div class="row" style="flex: 0 0 auto; gap: 8px;">
-            <strong class="price-tag">${formatEuro(rev)}</strong>
-            <button type="button" class="btn-ghost">Apri</button>
-          </div>
-        `;
-        row.querySelector("button").onclick = () => {
-          state.activeEventId = e.id;
-          saveState();
-          render();
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        };
-        historyList.appendChild(row);
-      });
     }
 
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;");
-    }
+    // Inizializza data default nuovo mercatino
+    document.getElementById("eventDateInput").value = todayISO();
 
-    // Eventi UI
-    document.getElementById("eventSelect").onchange = (e) => {
-      state.activeEventId = e.target.value;
-      saveState();
-      render();
-    };
-
-    document.getElementById("newEventBtn").onclick = () => {
-      const nameInput = document.getElementById("newEventName");
-      const dateInput = document.getElementById("newEventDate");
-      if (!dateInput.value) {
-        dateInput.value = new Date().toISOString().slice(0, 10);
-      }
-      nameInput.focus();
-    };
-
-    document.getElementById("createEventConfirm").onclick = () => {
-      const nameInput = document.getElementById("newEventName");
-      const dateInput = document.getElementById("newEventDate");
+    document.getElementById("newEventForm").onsubmit = (e) => {
+      e.preventDefault();
+      const nameInput = document.getElementById("eventNameInput");
+      const dateInput = document.getElementById("eventDateInput");
       const name = nameInput.value.trim();
       if (!name) return;
 
       const newEvt = {
         id: "evt_" + Date.now(),
         name,
-        date: dateInput.value || new Date().toISOString().slice(0, 10)
+        date: dateInput.value || todayISO()
       };
       state.events.unshift(newEvt);
-      state.activeEventId = newEvt.id;
       nameInput.value = "";
+      dateInput.value = todayISO();
+      openEvent(newEvt.id);
+    };
+
+    document.getElementById("backToEventsBtn").onclick = () => {
+      state.view = "events";
+      removeMode = false;
       saveState();
       render();
     };
 
-    document.getElementById("productForm").onsubmit = (e) => {
+    document.getElementById("productSearchInput").oninput = () => {
+      renderEventDetail();
+    };
+
+    document.getElementById("toggleRemoveModeBtn").onclick = () => {
+      removeMode = !removeMode;
+      renderEventDetail();
+    };
+
+    document.getElementById("tabSalesBtn").onclick = () => {
+      state.activeSubtab = "sales";
+      saveState();
+      renderEventDetail();
+    };
+
+    document.getElementById("tabRestocksBtn").onclick = () => {
+      state.activeSubtab = "restocks";
+      saveState();
+      renderEventDetail();
+    };
+
+    // Modale vendita dettaglio
+    document.getElementById("saleModalForm").onsubmit = (e) => {
       e.preventDefault();
-      const name = document.getElementById("prodName").value.trim();
-      const price = parseFloat(document.getElementById("prodPrice").value);
-      const needsDetail = document.getElementById("prodNeedsDetail").value === "true";
+      if (!pendingSaleProduct) return;
+      const price = parseFloat(document.getElementById("saleModalPrice").value);
+      const qty = parseInt(document.getElementById("saleModalQty").value, 10);
+      const detail = document.getElementById("saleModalDetail").value.trim();
+
+      registerSale({ product: pendingSaleProduct, price, qty, detail });
+      pendingSaleProduct = null;
+      document.getElementById("saleModal").classList.remove("open");
+    };
+
+    document.getElementById("cancelSaleModalBtn").onclick = () => {
+      pendingSaleProduct = null;
+      document.getElementById("saleModal").classList.remove("open");
+    };
+
+    // Modale aggiungi prodotto globale
+    document.getElementById("openAddProductBtn").onclick = () => {
+      removeMode = false;
+      document.getElementById("addProductModal").classList.add("open");
+      document.getElementById("newProdName").focus();
+    };
+
+    document.getElementById("cancelAddProductBtn").onclick = () => {
+      document.getElementById("addProductModal").classList.remove("open");
+    };
+
+    document.getElementById("addProductForm").onsubmit = (e) => {
+      e.preventDefault();
+      const name = document.getElementById("newProdName").value.trim();
+      const price = parseFloat(document.getElementById("newProdPrice").value);
+      const needsDetail = document.getElementById("newProdDetail").value === "true";
       if (!name || isNaN(price) || price < 0) return;
 
       const existing = state.products.find(p => p.name.toLowerCase() === name.toLowerCase());
@@ -676,30 +930,9 @@
       }
 
       e.target.reset();
+      document.getElementById("addProductModal").classList.remove("open");
       saveState();
-      render();
-    };
-
-    document.getElementById("saleModalForm").onsubmit = (e) => {
-      e.preventDefault();
-      if (!pendingProduct) return;
-      const price = parseFloat(document.getElementById("modalPrice").value);
-      const qty = parseInt(document.getElementById("modalQty").value, 10);
-      const detail = document.getElementById("modalDetail").value.trim();
-
-      // Aggiorna il prezzo memorizzato del prodotto se è stato modificato nella modale
-      const prodRef = state.products.find(p => p.id === pendingProduct.id);
-      if (prodRef && !isNaN(price) && price >= 0) {
-        prodRef.price = price;
-      }
-
-      addSale({ product: pendingProduct, price, qty, detail });
-      closeSaleModal();
-    };
-
-    document.getElementById("modalCancel").onclick = closeSaleModal;
-    document.getElementById("saleModal").onclick = (e) => {
-      if (e.target.id === "saleModal") closeSaleModal();
+      renderEventDetail();
     };
 
     render();
