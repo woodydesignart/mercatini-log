@@ -217,8 +217,15 @@
       padding: 10px 12px;
     }
 
-    .item-main { min-width: 0; }
+    .item-main {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
     .item-title { font-weight: 700; word-break: break-word; }
+    .item-price-row { font-size: 0.92rem; margin-top: 1px; }
     .item-sub { font-size: 0.82rem; color: var(--muted); }
 
     .price-tag {
@@ -897,7 +904,8 @@
         row.className = "list-item";
         row.innerHTML = `
           <div class="item-main">
-            <div class="item-title">${escapeHtml(prod.name)} — <span class="price-tag">${formatEuro(prod.price)}</span></div>
+            <div class="item-title">${escapeHtml(prod.name)}</div>
+            <div class="item-price-row"><span class="price-tag">${formatEuro(prod.price)}</span></div>
             <div class="item-sub">${prod.needsDetail ? "Chiede dettaglio (personaggio)" : "Click rapido diretto"}</div>
           </div>
           <div class="row" style="flex: 0 0 auto; gap: 6px;">
