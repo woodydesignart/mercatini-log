@@ -186,6 +186,12 @@
       font-size: 0.85rem;
     }
 
+    .btn-danger-solid {
+      background: var(--danger);
+      border-color: var(--danger);
+      color: #180606;
+    }
+
     .btn-ghost {
       background: var(--surface-2);
       color: var(--text);
@@ -291,6 +297,10 @@
     }
 
     .modal-backdrop.open { display: flex; }
+
+    .confirm-backdrop {
+      z-index: 80;
+    }
 
     .modal {
       width: 100%;
@@ -530,6 +540,18 @@
     </div>
   </div>
 
+  <!-- MODALE CONFERMA CANCELLAZIONE -->
+  <div id="confirmModal" class="modal-backdrop confirm-backdrop" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal">
+      <h3 id="confirmTitle">Conferma eliminazione</h3>
+      <p id="confirmMessage" class="item-sub" style="margin: 0 0 14px 0; font-size: 0.92rem; color: var(--text);"></p>
+      <div class="row">
+        <button type="button" id="confirmCancelBtn" class="btn-ghost">Annulla</button>
+        <button type="button" id="confirmAcceptBtn" class="btn-danger btn-danger-solid">Elimina</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const STORAGE_KEY = "mercatini_slide_v3";
     document.getElementById("footerYear").textContent = new Date().getFullYear();
@@ -555,6 +577,30 @@
     let state = loadState();
     let activePosEventId = null;
     let pendingSaleProduct = null;
+    let pendingConfirmAction = null;
+
+    function openConfirmModal({ title, message, confirmLabel = "Elimina", onConfirm }) {
+      pendingConfirmAction = onConfirm;
+      document.getElementById("confirmTitle").textContent = title || "Conferma eliminazione";
+      document.getElementById("confirmMessage").textContent = message;
+      document.getElementById("confirmAcceptBtn").textContent = confirmLabel;
+      document.getElementById("confirmModal").classList.add("open");
+    }
+
+    function closeConfirmModal() {
+      pendingConfirmAction = null;
+      document.getElementById("confirmModal").classList.remove("open");
+    }
+
+    document.getElementById("confirmCancelBtn").onclick = closeConfirmModal;
+    document.getElementById("confirmModal").onclick = (e) => {
+      if (e.target.id === "confirmModal") closeConfirmModal();
+    };
+    document.getElementById("confirmAcceptBtn").onclick = () => {
+      const action = pendingConfirmAction;
+      closeConfirmModal();
+      if (typeof action === "function") action();
+    };
 
     function normalizeState(rawObj) {
       const base = defaultState();
@@ -819,10 +865,17 @@
         `;
         row.querySelector('[data-action="open"]').onclick = () => openPosForEvent(evt.id);
         row.querySelector('[data-action="delete"]').onclick = () => {
-          state.events = state.events.filter(e => e.id !== evt.id);
-          state.sales = state.sales.filter(s => s.eventId !== evt.id);
-          saveState();
-          renderAll();
+          openConfirmModal({
+            title: "Elimina mercatino",
+            message: `Vuoi davvero eliminare "${evt.name}" e tutte le vendite associate?`,
+            confirmLabel: "Elimina mercatino",
+            onConfirm: () => {
+              state.events = state.events.filter(e => e.id !== evt.id);
+              state.sales = state.sales.filter(s => s.eventId !== evt.id);
+              saveState();
+              renderAll();
+            }
+          });
         };
         list.appendChild(row);
       });
@@ -862,12 +915,19 @@
           document.getElementById("catProdName").focus();
         };
         row.querySelector('[data-action="remove"]').onclick = () => {
-          if (document.getElementById("editProdId").value === prod.id) {
-            resetCatalogForm();
-          }
-          state.products = state.products.filter(p => p.id !== prod.id);
-          saveState();
-          renderAll();
+          openConfirmModal({
+            title: "Rimuovi prodotto",
+            message: `Vuoi rimuovere "${prod.name}" dal catalogo dei pulsanti?`,
+            confirmLabel: "Rimuovi",
+            onConfirm: () => {
+              if (document.getElementById("editProdId").value === prod.id) {
+                resetCatalogForm();
+              }
+              state.products = state.products.filter(p => p.id !== prod.id);
+              saveState();
+              renderAll();
+            }
+          });
         };
         list.appendChild(row);
       });
@@ -1007,9 +1067,16 @@
             <button type="button" class="btn-danger">Elimina</button>
           `;
           row.querySelector("button").onclick = () => {
-            state.sales = state.sales.filter(item => item.id !== s.id);
-            saveState();
-            renderAll();
+            openConfirmModal({
+              title: "Elimina vendita",
+              message: `Vuoi eliminare la vendita di "${s.productName}" (x${s.qty}, ${formatEuro(s.total)})?`,
+              confirmLabel: "Elimina vendita",
+              onConfirm: () => {
+                state.sales = state.sales.filter(item => item.id !== s.id);
+                saveState();
+                renderAll();
+              }
+            });
           };
           salesList.appendChild(row);
         });
