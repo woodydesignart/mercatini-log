@@ -29,7 +29,7 @@
       background: var(--bg);
       color: var(--text);
       line-height: 1.4;
-      overflow-x: clip;
+      overflow-x: hidden;
     }
 
     .app {
@@ -38,7 +38,6 @@
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
-      overflow-x: clip;
     }
 
     /* Barra navigazione schermate + indicatori slide */
@@ -116,10 +115,8 @@
       min-width: 100%;
       max-width: 100%;
       width: 100%;
-      contain: inline-size;
       scroll-snap-align: start;
       scroll-snap-stop: always;
-      overflow-x: clip;
       padding: 12px;
       padding-bottom: 84px;
     }
@@ -157,10 +154,7 @@
       align-items: center;
     }
 
-    .row > * {
-      flex: 1 1 auto;
-      min-width: 0;
-    }
+    .row > * { flex: 1 1 auto; }
 
     input, select, button {
       font: inherit;
@@ -170,7 +164,6 @@
       color: var(--text);
       padding: 10px 12px;
       min-height: 44px;
-      max-width: 100%;
     }
 
     input::placeholder { color: var(--muted); }
@@ -599,7 +592,7 @@
 
     <footer id="floatingFooter" class="app-footer">
       <div class="footer-main">
-        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.0.6</span></span>
+        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.0.7</span></span>
         <span aria-hidden="true">•</span>
         <div class="footer-backup-block">
           <span class="footer-backup-note">Salva o ripristina tutti i dati</span>
@@ -675,7 +668,7 @@
   </div>
 
   <script>
-    const APP_VERSION = "v1.0.6";
+    const APP_VERSION = "v1.0.7";
     const STORAGE_KEY = "mercatini_slide_v3";
 
     document.getElementById("footerYear").textContent = String(new Date().getFullYear());
@@ -928,9 +921,9 @@
       if (clamped !== state.currentSlide) {
         state.currentSlide = clamped;
         saveState();
-        scrollPageToTop();
       }
       updateSlideIndicators(clamped);
+      updateFloatingFooterVisibility();
     }
 
     track.addEventListener("scroll", () => {
@@ -952,13 +945,6 @@
       clearTimeout(scrollSyncTimer);
       scrollSyncTimer = setTimeout(commitSlideFromScroll, 140);
     }, { passive: true });
-
-    if ("onscrollend" in track) {
-      track.addEventListener("scrollend", () => {
-        clearTimeout(scrollSyncTimer);
-        commitSlideFromScroll();
-      }, { passive: true });
-    }
 
     window.addEventListener("scroll", updateFloatingFooterVisibility, { passive: true });
     window.addEventListener("resize", () => {
