@@ -38,6 +38,7 @@
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
     /* Barra navigazione schermate + indicatori slide */
@@ -86,7 +87,7 @@
       height: 5px;
       border-radius: 999px;
       background: var(--surface-3);
-      transition: background 0.12s ease, width 0.12s ease;
+      transition: background 0.15s ease, width 0.15s ease;
     }
 
     .dot.active {
@@ -94,29 +95,32 @@
       background: var(--accent);
     }
 
-    /* Contenitore slide orizzontali */
-    .slides-track {
+    /* Viewport e binario slide gestiti via translate3d */
+    .slides-viewport {
       flex: 1 1 auto;
+      width: 100%;
+      overflow-x: hidden;
+      touch-action: pan-y;
+    }
+
+    .slides-track {
       width: 100%;
       display: flex;
       align-items: flex-start;
-      overflow-x: auto;
-      overflow-y: hidden;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      will-change: transform;
+      transform: translate3d(0%, 0, 0);
+      transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    .slides-track::-webkit-scrollbar { display: none; }
+    .slides-track.is-dragging {
+      transition: none;
+    }
 
     .slide {
       flex: 0 0 100%;
-      min-width: 100%;
-      max-width: 100%;
       width: 100%;
-      scroll-snap-align: start;
-      scroll-snap-stop: always;
+      max-width: 100%;
+      min-width: 100%;
       padding: 12px;
       padding-bottom: 84px;
     }
@@ -514,85 +518,87 @@
       </div>
     </header>
 
-    <main id="slidesTrack" class="slides-track">
-      <!-- SLIDE 0: MERCATINI -->
-      <section class="slide is-active-slide" data-index="0">
-        <div class="card">
-          <h1>Nuovo Mercatino</h1>
-          <form id="newEventForm" class="row">
-            <input id="eventNameInput" type="text" placeholder="Nome mercatino" required />
-            <input id="eventDateInput" type="date" style="max-width: 165px;" required />
-            <button type="submit" class="btn-primary">+ Crea e apri cassa</button>
-          </form>
-        </div>
-
-        <div class="card">
-          <h2>Elenco mercatini</h2>
-          <div id="eventsList" class="list"></div>
-        </div>
-      </section>
-
-      <!-- SLIDE 1: ELENCO GENERALE PULSANTI PRODOTTI (MODIFICABILI) -->
-      <section class="slide" data-index="1">
-        <div class="card">
-          <h1>Catalogo Pulsanti Prodotti</h1>
-          <div class="item-sub" style="margin-bottom: 10px;">
-            Elenco generale ordinato in automatico per frequenza di vendita, condiviso tra tutti i mercatini.
+    <main id="slidesViewport" class="slides-viewport">
+      <div id="slidesTrack" class="slides-track">
+        <!-- SLIDE 0: MERCATINI -->
+        <section class="slide is-active-slide" data-index="0">
+          <div class="card">
+            <h1>Nuovo Mercatino</h1>
+            <form id="newEventForm" class="row">
+              <input id="eventNameInput" type="text" placeholder="Nome mercatino" required />
+              <input id="eventDateInput" type="date" style="max-width: 165px;" required />
+              <button type="submit" class="btn-primary">+ Crea e apri cassa</button>
+            </form>
           </div>
-          <form id="catalogForm" class="row">
-            <input type="hidden" id="editProdId" />
-            <input id="catProdName" type="text" placeholder="Nome prodotto (es. Segnalibri)" required />
-            <input id="catProdPrice" type="number" step="0.01" min="0" placeholder="Prezzo €" style="max-width: 120px;" required />
-            <select id="catProdDetail" style="max-width: 210px;">
-              <option value="true">Chiede dettaglio (personaggio)</option>
-              <option value="false">Click rapido diretto</option>
-            </select>
-            <button type="submit" id="catSaveBtn" class="btn-primary">+ Aggiungi</button>
-            <button type="button" id="catCancelEditBtn" class="btn-ghost" style="display:none;">Annulla</button>
-          </form>
-        </div>
 
-        <div class="card">
-          <div class="row" style="margin-bottom: 10px;">
-            <h2 style="margin: 0;">Pulsanti salvati (più venduti in alto)</h2>
-            <input id="catalogSearch" type="search" placeholder="Filtra prodotti..." style="max-width: 220px; min-height: 36px; padding: 6px 10px;" />
+          <div class="card">
+            <h2>Elenco mercatini</h2>
+            <div id="eventsList" class="list"></div>
           </div>
-          <div id="catalogList" class="list"></div>
-        </div>
-      </section>
+        </section>
 
-      <!-- SLIDE 2: RICAVI PER MERCATINO E TOTALE FIN ORA -->
-      <section class="slide" data-index="2">
-        <div class="card">
-          <h1>Ricavi & Storico</h1>
-          <div class="grand-total-box">
-            <div>
-              <div class="item-sub">Totale guadagnato finora</div>
-              <div id="grandTotalMeta" class="item-sub">0 mercatini • 0 pezzi venduti</div>
+        <!-- SLIDE 1: ELENCO GENERALE PULSANTI PRODOTTI (MODIFICABILI) -->
+        <section class="slide" data-index="1">
+          <div class="card">
+            <h1>Catalogo Pulsanti Prodotti</h1>
+            <div class="item-sub" style="margin-bottom: 10px;">
+              Elenco generale ordinato in automatico per frequenza di vendita, condiviso tra tutti i mercatini.
             </div>
-            <div id="grandTotalValue" class="grand-total-amount">0,00 €</div>
+            <form id="catalogForm" class="row">
+              <input type="hidden" id="editProdId" />
+              <input id="catProdName" type="text" placeholder="Nome prodotto (es. Segnalibri)" required />
+              <input id="catProdPrice" type="number" step="0.01" min="0" placeholder="Prezzo €" style="max-width: 120px;" required />
+              <select id="catProdDetail" style="max-width: 210px;">
+                <option value="true">Chiede dettaglio (personaggio)</option>
+                <option value="false">Click rapido diretto</option>
+              </select>
+              <button type="submit" id="catSaveBtn" class="btn-primary">+ Aggiungi</button>
+              <button type="button" id="catCancelEditBtn" class="btn-ghost" style="display:none;">Annulla</button>
+            </form>
           </div>
 
-          <h2>Ricavi per mercatino</h2>
-          <div id="revenuesList" class="list"></div>
-        </div>
-      </section>
-
-      <!-- SLIDE 3: ELENCO AGGIORNATO RIMPIAZZI DA FARE -->
-      <section class="slide" data-index="3">
-        <div class="card">
-          <h1>Rimpiazzi da fare</h1>
-          <div class="item-sub" style="margin-bottom: 10px;">
-            Raggruppati per categoria prodotto, con le singole personalizzazioni ordinate.
+          <div class="card">
+            <div class="row" style="margin-bottom: 10px;">
+              <h2 style="margin: 0;">Pulsanti salvati (più venduti in alto)</h2>
+              <input id="catalogSearch" type="search" placeholder="Filtra prodotti..." style="max-width: 220px; min-height: 36px; padding: 6px 10px;" />
+            </div>
+            <div id="catalogList" class="list"></div>
           </div>
-          <div id="globalRestocksList" class="restock-groups"></div>
-        </div>
-      </section>
+        </section>
+
+        <!-- SLIDE 2: RICAVI PER MERCATINO E TOTALE FIN ORA -->
+        <section class="slide" data-index="2">
+          <div class="card">
+            <h1>Ricavi & Storico</h1>
+            <div class="grand-total-box">
+              <div>
+                <div class="item-sub">Totale guadagnato finora</div>
+                <div id="grandTotalMeta" class="item-sub">0 mercatini • 0 pezzi venduti</div>
+              </div>
+              <div id="grandTotalValue" class="grand-total-amount">0,00 €</div>
+            </div>
+
+            <h2>Ricavi per mercatino</h2>
+            <div id="revenuesList" class="list"></div>
+          </div>
+        </section>
+
+        <!-- SLIDE 3: ELENCO AGGIORNATO RIMPIAZZI DA FARE -->
+        <section class="slide" data-index="3">
+          <div class="card">
+            <h1>Rimpiazzi da fare</h1>
+            <div class="item-sub" style="margin-bottom: 10px;">
+              Raggruppati per categoria prodotto, con le singole personalizzazioni ordinate.
+            </div>
+            <div id="globalRestocksList" class="restock-groups"></div>
+          </div>
+        </section>
+      </div>
     </main>
 
     <footer id="floatingFooter" class="app-footer">
       <div class="footer-main">
-        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.0.7</span></span>
+        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.0.8</span></span>
         <span aria-hidden="true">•</span>
         <div class="footer-backup-block">
           <span class="footer-backup-note">Salva o ripristina tutti i dati</span>
@@ -668,7 +674,7 @@
   </div>
 
   <script>
-    const APP_VERSION = "v1.0.7";
+    const APP_VERSION = "v1.0.8";
     const STORAGE_KEY = "mercatini_slide_v3";
 
     document.getElementById("footerYear").textContent = String(new Date().getFullYear());
@@ -856,14 +862,13 @@
         .replaceAll('"', "&quot;");
     }
 
-    // Navigazione slide e footer flottante vicino al fondo
+    // Navigazione slide tramite translate3d e gesti touch (zero sbavature laterali)
+    const viewport = document.getElementById("slidesViewport");
     const track = document.getElementById("slidesTrack");
     const slides = [...document.querySelectorAll(".slide")];
     const tabs = [...document.querySelectorAll(".nav-tab")];
     const dots = [...document.querySelectorAll(".dot")];
     const floatingFooter = document.getElementById("floatingFooter");
-    let scrollSyncTimer = null;
-    let navRafId = null;
 
     function updateFloatingFooterVisibility() {
       const docEl = document.documentElement;
@@ -896,59 +901,109 @@
       slides.forEach((s, i) => s.classList.toggle("is-active-slide", i === index));
     }
 
-    function snapTrackToIndex(index) {
-      if (!track.clientWidth) return;
-      track.scrollLeft = index * track.clientWidth;
+    function setTrackPositionPercent(percent, animate = true) {
+      track.classList.toggle("is-dragging", !animate);
+      track.style.transform = `translate3d(${percent}%, 0, 0)`;
     }
 
-    function goToSlide(index, _smooth = true) {
+    function goToSlide(index, animate = true) {
       const clamped = Math.max(0, Math.min(3, index));
+      const changed = clamped !== state.currentSlide;
       state.currentSlide = clamped;
       saveState();
       updateSlideIndicators(clamped);
-      scrollPageToTop();
-      snapTrackToIndex(clamped);
+      setTrackPositionPercent(-clamped * 100, animate);
+      if (changed) {
+        scrollPageToTop();
+      } else {
+        updateFloatingFooterVisibility();
+      }
     }
 
     tabs.forEach(tab => {
-      tab.onclick = () => goToSlide(Number(tab.dataset.slide));
+      tab.onclick = () => goToSlide(Number(tab.dataset.slide), true);
     });
 
-    function commitSlideFromScroll() {
-      if (!track.clientWidth) return;
-      const idx = Math.round(track.scrollLeft / track.clientWidth);
-      const clamped = Math.max(0, Math.min(3, idx));
-      if (clamped !== state.currentSlide) {
-        state.currentSlide = clamped;
-        saveState();
+    // Gestione swipe touch orizzontale
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+    let isHorizontalSwipe = null;
+    let lastDeltaX = 0;
+
+    viewport.addEventListener("touchstart", (e) => {
+      if (e.touches.length !== 1) return;
+      const t = e.touches[0];
+      touchStartX = t.clientX;
+      touchStartY = t.clientY;
+      touchStartTime = Date.now();
+      isHorizontalSwipe = null;
+      lastDeltaX = 0;
+    }, { passive: true });
+
+    viewport.addEventListener("touchmove", (e) => {
+      if (e.touches.length !== 1) return;
+      const t = e.touches[0];
+      const dx = t.clientX - touchStartX;
+      const dy = t.clientY - touchStartY;
+
+      if (isHorizontalSwipe === null) {
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+        isHorizontalSwipe = Math.abs(dx) > Math.abs(dy) * 1.15;
       }
-      updateSlideIndicators(clamped);
-      updateFloatingFooterVisibility();
+
+      if (!isHorizontalSwipe) return;
+
+      lastDeltaX = dx;
+      const width = viewport.clientWidth || window.innerWidth || 1;
+      let effectiveDx = dx;
+
+      // Resistenza elastica ai bordi (prima e ultima slide)
+      if ((state.currentSlide === 0 && dx > 0) || (state.currentSlide === 3 && dx < 0)) {
+        effectiveDx = dx * 0.28;
+      }
+
+      const basePercent = -state.currentSlide * 100;
+      const deltaPercent = (effectiveDx / width) * 100;
+      setTrackPositionPercent(basePercent + deltaPercent, false);
+    }, { passive: true });
+
+    function finishTouchSwipe() {
+      if (!isHorizontalSwipe) {
+        isHorizontalSwipe = null;
+        return;
+      }
+
+      const width = viewport.clientWidth || window.innerWidth || 1;
+      const elapsed = Math.max(1, Date.now() - touchStartTime);
+      const velocity = Math.abs(lastDeltaX) / elapsed; // px/ms
+      const isQuickFlick = velocity > 0.35 && Math.abs(lastDeltaX) > 28;
+      const isFarEnough = Math.abs(lastDeltaX) > width * 0.22;
+
+      let targetSlide = state.currentSlide;
+      if (isQuickFlick || isFarEnough) {
+        if (lastDeltaX < 0 && state.currentSlide < 3) {
+          targetSlide = state.currentSlide + 1;
+        } else if (lastDeltaX > 0 && state.currentSlide > 0) {
+          targetSlide = state.currentSlide - 1;
+        }
+      }
+
+      isHorizontalSwipe = null;
+      lastDeltaX = 0;
+      goToSlide(targetSlide, true);
     }
 
-    track.addEventListener("scroll", () => {
-      if (!track.clientWidth) return;
-
-      if (!navRafId) {
-        navRafId = requestAnimationFrame(() => {
-          navRafId = null;
-          const idx = Math.round(track.scrollLeft / track.clientWidth);
-          const clamped = Math.max(0, Math.min(3, idx));
-          if (clamped !== state.currentSlide) {
-            state.currentSlide = clamped;
-            updateSlideIndicators(clamped);
-            updateFloatingFooterVisibility();
-          }
-        });
-      }
-
-      clearTimeout(scrollSyncTimer);
-      scrollSyncTimer = setTimeout(commitSlideFromScroll, 140);
+    viewport.addEventListener("touchend", finishTouchSwipe, { passive: true });
+    viewport.addEventListener("touchcancel", () => {
+      isHorizontalSwipe = null;
+      lastDeltaX = 0;
+      goToSlide(state.currentSlide, true);
     }, { passive: true });
 
     window.addEventListener("scroll", updateFloatingFooterVisibility, { passive: true });
     window.addEventListener("resize", () => {
-      snapTrackToIndex(state.currentSlide);
+      setTrackPositionPercent(-state.currentSlide * 100, false);
       updateFloatingFooterVisibility();
     });
 
