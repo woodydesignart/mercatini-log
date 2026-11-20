@@ -549,8 +549,8 @@
               <input id="catProdName" type="text" placeholder="Nome prodotto (es. Segnalibri)" required />
               <input id="catProdPrice" type="number" step="0.01" min="0" placeholder="Prezzo €" style="max-width: 120px;" required />
               <select id="catProdDetail" style="max-width: 210px;">
-                <option value="true">Chiede dettaglio (personaggio)</option>
-                <option value="false">Click rapido diretto</option>
+                <option value="true">Personalizzazione</option>
+                <option value="false">Standard</option>
               </select>
               <button type="submit" id="catSaveBtn" class="btn-primary">+ Aggiungi</button>
               <button type="button" id="catCancelEditBtn" class="btn-ghost" style="display:none;">Annulla</button>
@@ -598,7 +598,7 @@
 
     <footer id="floatingFooter" class="app-footer">
       <div class="footer-main">
-        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.0.8</span></span>
+        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.0.9</span></span>
         <span aria-hidden="true">•</span>
         <div class="footer-backup-block">
           <span class="footer-backup-note">Salva o ripristina tutti i dati</span>
@@ -674,7 +674,7 @@
   </div>
 
   <script>
-    const APP_VERSION = "v1.0.8";
+    const APP_VERSION = "v1.0.9";
     const STORAGE_KEY = "mercatini_slide_v3";
 
     document.getElementById("footerYear").textContent = String(new Date().getFullYear());
@@ -976,7 +976,7 @@
 
       const width = viewport.clientWidth || window.innerWidth || 1;
       const elapsed = Math.max(1, Date.now() - touchStartTime);
-      const velocity = Math.abs(lastDeltaX) / elapsed; // px/ms
+      const velocity = Math.abs(lastDeltaX) / elapsed;
       const isQuickFlick = velocity > 0.35 && Math.abs(lastDeltaX) > 28;
       const isFarEnough = Math.abs(lastDeltaX) > width * 0.22;
 
@@ -1152,7 +1152,7 @@
 
       filtered.forEach(prod => {
         const soldQty = counts.get(String(prod.name || "").trim().toLowerCase()) || 0;
-        const detailLabel = prod.needsDetail ? "Chiede dettaglio (personaggio)" : "Click rapido diretto";
+        const detailLabel = prod.needsDetail ? "Personalizzazione" : "Standard";
         const row = document.createElement("div");
         row.className = "list-item";
         row.innerHTML = `
