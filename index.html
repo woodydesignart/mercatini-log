@@ -266,6 +266,44 @@
     .item-price-row { font-size: 0.92rem; margin-top: 1px; }
     .item-sub { font-size: 0.82rem; color: var(--muted); }
 
+    /* Gruppi categoria nei rimpiazzi */
+    .restock-groups {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .restock-group {
+      background: rgba(34, 38, 47, 0.45);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .restock-group-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 2px 2px 8px 2px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .restock-group-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--accent);
+      word-break: break-word;
+    }
+
+    .restock-group-count {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
     .price-tag {
       color: var(--ok);
       font-weight: 700;
@@ -548,16 +586,16 @@
         <div class="card">
           <h1>Rimpiazzi da fare</h1>
           <div class="item-sub" style="margin-bottom: 10px;">
-            Elenco aggiornato dei pezzi venduti da rimpiazzare/rifare.
+            Raggruppati per categoria prodotto, con le singole personalizzazioni ordinate.
           </div>
-          <div id="globalRestocksList" class="list"></div>
+          <div id="globalRestocksList" class="restock-groups"></div>
         </div>
       </section>
     </main>
 
     <footer id="floatingFooter" class="app-footer">
       <div class="footer-main">
-        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.0.3</span></span>
+        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.0.4</span></span>
         <span aria-hidden="true">•</span>
         <div class="footer-backup-block">
           <span class="footer-backup-note">Salva o ripristina tutti i dati</span>
@@ -633,7 +671,7 @@
   </div>
 
   <script>
-    const APP_VERSION = "v1.0.3";
+    const APP_VERSION = "v1.0.4";
     const STORAGE_KEY = "mercatini_slide_v3";
 
     document.getElementById("footerYear").textContent = String(new Date().getFullYear());
@@ -1129,42 +1167,90 @@
     }
 
     function renderRestocksSlide() {
-      const list = document.getElementById("globalRestocksList");
+      const container = document.getElementById("globalRestocksList");
       const activeRestocks = state.restocks.filter(r => r.qty > 0);
-      list.innerHTML = "";
+      container.innerHTML = "";
 
       if (activeRestocks.length === 0) {
-        list.innerHTML = `<div class="empty">Nessun pezzo da rimpiazzare al momento.</div>`;
+        container.innerHTML = `<div class="empty">Nessun pezzo da rimpiazzare al momento.</div>`;
         return;
       }
 
+      // Raggruppa i rimpiazzi per categoria prodotto (productName)
+      const groupsMap = new Map();
       activeRestocks.forEach(r => {
-        const detailPart = r.detail ? ` — <strong>${escapeHtml(r.detail)}</strong>` : "";
-        const row = document.createElement("div");
-        row.className = "list-item";
-        row.innerHTML = `
-          <div class="item-main">
-            <div class="item-title">${escapeHtml(r.productName)}${detailPart}</div>
-            <div class="item-sub">Da rimpiazzare</div>
+        const rawName = String(r.productName || "Altro").trim() || "Altro";
+        const key = rawName.toLowerCase();
+        if (!groupsMap.has(key)) {
+          groupsMap.set(key, {
+            categoryName: rawName,
+            totalQty: 0,
+            items: []
+          });
+        }
+        const group = groupsMap.get(key);
+        group.totalQty += r.qty;
+        group.items.push(r);
+      });
+
+      // Ordina le categorie per quantità totale decrescente, poi alfabetico
+      const sortedGroups = [...groupsMap.values()].sort((a, b) => {
+        if (b.totalQty !== a.totalQty) return b.totalQty - a.totalQty;
+        return a.categoryName.localeCompare(b.categoryName, "it", { sensitivity: "base" });
+      });
+
+      sortedGroups.forEach(group => {
+        // Ordina le singole personalizzazioni dentro la categoria in ordine alfabetico
+        group.items.sort((a, b) => {
+          const detA = (a.detail || "").trim();
+          const detB = (b.detail || "").trim();
+          if (!detA && detB) return -1;
+          if (detA && !detB) return 1;
+          return detA.localeCompare(detB, "it", { sensitivity: "base" });
+        });
+
+        const groupBox = document.createElement("div");
+        groupBox.className = "restock-group";
+        groupBox.innerHTML = `
+          <div class="restock-group-header">
+            <div class="restock-group-title">${escapeHtml(group.categoryName)}</div>
+            <div class="restock-group-count">${group.totalQty} ${group.totalQty === 1 ? "pezzo" : "pezzi"}</div>
           </div>
-          <div class="row" style="flex: 0 0 auto; gap: 6px;">
-            <span class="badge">x${r.qty}</span>
-            <button type="button" class="btn-ghost" data-action="minus">-1</button>
-            <button type="button" class="btn-danger" data-action="done">Fatto</button>
-          </div>
+          <div class="list"></div>
         `;
-        row.querySelector('[data-action="minus"]').onclick = () => {
-          r.qty = Math.max(0, r.qty - 1);
-          state.restocks = state.restocks.filter(item => item.qty > 0);
-          saveState();
-          renderAll();
-        };
-        row.querySelector('[data-action="done"]').onclick = () => {
-          state.restocks = state.restocks.filter(item => item.id !== r.id);
-          saveState();
-          renderAll();
-        };
-        list.appendChild(row);
+
+        const groupList = groupBox.querySelector(".list");
+        group.items.forEach(r => {
+          const hasDetail = Boolean((r.detail || "").trim());
+          const itemTitle = hasDetail ? escapeHtml(r.detail) : `${escapeHtml(group.categoryName)} (standard)`;
+          const row = document.createElement("div");
+          row.className = "list-item";
+          row.innerHTML = `
+            <div class="item-main">
+              <div class="item-title">${itemTitle}</div>
+              <div class="item-sub">${escapeHtml(group.categoryName)}</div>
+            </div>
+            <div class="row" style="flex: 0 0 auto; gap: 6px;">
+              <span class="badge">x${r.qty}</span>
+              <button type="button" class="btn-ghost" data-action="minus">-1</button>
+              <button type="button" class="btn-danger" data-action="done">Fatto</button>
+            </div>
+          `;
+          row.querySelector('[data-action="minus"]').onclick = () => {
+            r.qty = Math.max(0, r.qty - 1);
+            state.restocks = state.restocks.filter(item => item.qty > 0);
+            saveState();
+            renderAll();
+          };
+          row.querySelector('[data-action="done"]').onclick = () => {
+            state.restocks = state.restocks.filter(item => item.id !== r.id);
+            saveState();
+            renderAll();
+          };
+          groupList.appendChild(row);
+        });
+
+        container.appendChild(groupBox);
       });
     }
 
