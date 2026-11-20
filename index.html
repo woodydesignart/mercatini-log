@@ -122,7 +122,7 @@
       max-width: 100%;
       min-width: 100%;
       padding: 12px;
-      padding-bottom: 84px;
+      padding-bottom: 112px;
     }
 
     .slide:not(.is-active-slide) {
@@ -418,6 +418,7 @@
       position: fixed;
       left: 50%;
       bottom: 10px;
+      margin-top: 24px;
       transform: translate(-50%, 14px);
       width: calc(100% - 24px);
       max-width: 836px;
@@ -598,7 +599,7 @@
 
     <footer id="floatingFooter" class="app-footer">
       <div class="footer-main">
-        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.1.0</span></span>
+        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.1.1</span></span>
         <span aria-hidden="true">•</span>
         <div class="footer-backup-block">
           <span class="footer-backup-note">Salva o ripristina tutti i dati</span>
@@ -674,7 +675,7 @@
   </div>
 
   <script>
-    const APP_VERSION = "v1.1.0";
+    const APP_VERSION = "v1.1.1";
     const STORAGE_KEY = "mercatini_slide_v3";
 
     document.getElementById("footerYear").textContent = String(new Date().getFullYear());
@@ -1260,20 +1261,9 @@
         group.items.push(r);
       });
 
-      const sortedGroups = [...groupsMap.values()].sort((a, b) => {
-        if (b.totalQty !== a.totalQty) return b.totalQty - a.totalQty;
-        return a.categoryName.localeCompare(b.categoryName, "it", { sensitivity: "base" });
-      });
+      const groupsList = [...groupsMap.values()];
 
-      sortedGroups.forEach(group => {
-        group.items.sort((a, b) => {
-          const detA = (a.detail || "").trim();
-          const detB = (b.detail || "").trim();
-          if (!detA && detB) return -1;
-          if (detA && !detB) return 1;
-          return detA.localeCompare(detB, "it", { sensitivity: "base" });
-        });
-
+      groupsList.forEach(group => {
         const groupBox = document.createElement("div");
         groupBox.className = "restock-group";
         groupBox.innerHTML = `
@@ -1303,14 +1293,24 @@
           `;
           row.querySelector('[data-action="minus"]').onclick = () => {
             r.qty = Math.max(0, r.qty - 1);
-            state.restocks = state.restocks.filter(item => item.qty > 0);
+            if (r.qty === 0) {
+              state.restocks = state.restocks.filter(item => item.id !== r.id);
+            }
             saveState();
             renderAll();
           };
           row.querySelector('[data-action="done"]').onclick = () => {
-            state.restocks = state.restocks.filter(item => item.id !== r.id);
-            saveState();
-            renderAll();
+            const label = hasDetail ? `${r.detail} (${group.categoryName})` : `${group.categoryName} (standard)`;
+            openConfirmModal({
+              title: "Conferma rimpiazzo fatto",
+              message: `Vuoi segnare come completato "${label}" (x${r.qty})?`,
+              confirmLabel: "Fatto",
+              onConfirm: () => {
+                state.restocks = state.restocks.filter(item => item.id !== r.id);
+                saveState();
+                renderAll();
+              }
+            });
           };
           groupList.appendChild(row);
         });
