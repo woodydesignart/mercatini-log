@@ -608,11 +608,12 @@
           <div class="card">
             <h1>Inventario</h1>
             <div class="item-sub" style="margin-bottom: 10px;">
-              Diviso per categoria prodotto. Scegli un prodotto (es. Segnalibri) e aggiungi i singoli personaggi o varianti con la quantità.
+              Scrivi o scegli il prodotto/categoria, indica l'eventuale personalizzazione e imposta la quantità.
             </div>
             <form id="inventoryAddForm" class="row">
-              <select id="invCategorySelect" style="min-width: 150px;" required></select>
-              <input id="invDetailInput" type="text" placeholder="Personaggio / variante (es. Batman, Frida)" />
+              <input id="invCategoryInput" list="invCategoryOptions" type="text" placeholder="Prodotto / categoria (es. Segnalibri)" style="min-width: 165px;" required />
+              <datalist id="invCategoryOptions"></datalist>
+              <input id="invDetailInput" type="text" placeholder="Personalizzazione" />
               <input id="invQtyInput" type="number" min="0" value="0" style="max-width: 105px;" required />
               <button type="submit" class="btn-primary">+ Aggiungi</button>
             </form>
@@ -621,7 +622,7 @@
           <div class="card">
             <div class="row" style="margin-bottom: 10px;">
               <h2 style="margin: 0;">Giacenze per categoria</h2>
-              <input id="inventorySearch" type="search" placeholder="Filtra personaggi o prodotti..." style="max-width: 220px; min-height: 36px; padding: 6px 10px;" />
+              <input id="inventorySearch" type="search" placeholder="Filtra personalizzazioni o prodotti..." style="max-width: 240px; min-height: 36px; padding: 6px 10px;" />
             </div>
             <div id="inventoryGroupsList" class="restock-groups"></div>
           </div>
@@ -631,7 +632,7 @@
 
     <footer id="floatingFooter" class="app-footer">
       <div class="footer-main">
-        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.1.3</span></span>
+        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.1.4</span></span>
         <span aria-hidden="true">•</span>
         <div class="footer-backup-block">
           <span class="footer-backup-note">Salva o ripristina tutti i dati</span>
@@ -707,7 +708,7 @@
   </div>
 
   <script>
-    const APP_VERSION = "v1.1.3";
+    const APP_VERSION = "v1.1.4";
     const STORAGE_KEY = "mercatini_slide_v3";
     const MAX_SLIDE_INDEX = 4;
 
@@ -1404,10 +1405,9 @@
       });
     }
 
-    function syncInventoryCategorySelect() {
-      const select = document.getElementById("invCategorySelect");
-      if (!select) return;
-      const previousValue = select.value;
+    function syncInventoryCategoryDatalist() {
+      const datalist = document.getElementById("invCategoryOptions");
+      if (!datalist) return;
 
       const categoriesSet = new Map();
       state.products.forEach(p => {
@@ -1422,25 +1422,18 @@
           categoriesSet.set(name.toLowerCase(), name);
         }
       });
-      if (!categoriesSet.has("altro")) {
-        categoriesSet.set("altro", "Altro");
-      }
 
       const sortedCategories = [...categoriesSet.values()].sort((a, b) =>
         a.localeCompare(b, "it", { sensitivity: "base" })
       );
 
-      select.innerHTML = sortedCategories
-        .map(cat => `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`)
+      datalist.innerHTML = sortedCategories
+        .map(cat => `<option value="${escapeHtml(cat)}"></option>`)
         .join("");
-
-      if (previousValue && sortedCategories.includes(previousValue)) {
-        select.value = previousValue;
-      }
     }
 
     function renderInventorySlide() {
-      syncInventoryCategorySelect();
+      syncInventoryCategoryDatalist();
       const container = document.getElementById("inventoryGroupsList");
       const query = (document.getElementById("inventorySearch").value || "").trim().toLowerCase();
       container.innerHTML = "";
@@ -1694,7 +1687,7 @@
     // Form aggiunta manuale inventario
     document.getElementById("inventoryAddForm").onsubmit = (e) => {
       e.preventDefault();
-      const categoryName = (document.getElementById("invCategorySelect").value || "Altro").trim() || "Altro";
+      const categoryName = (document.getElementById("invCategoryInput").value || "").trim() || "Altro";
       const detail = document.getElementById("invDetailInput").value.trim();
       const qty = Math.max(0, parseInt(document.getElementById("invQtyInput").value, 10) || 0);
 
