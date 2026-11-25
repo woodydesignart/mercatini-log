@@ -669,7 +669,7 @@
 
     <footer id="floatingFooter" class="app-footer">
       <div class="footer-main">
-        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.1.5</span></span>
+        <span>© <span id="footerYear">2026</span> woodydesignart • <span id="appVersionLabel">v1.1.6</span></span>
         <span aria-hidden="true">•</span>
         <div class="footer-backup-block">
           <span class="footer-backup-note">Salva o ripristina tutti i dati</span>
@@ -745,7 +745,7 @@
   </div>
 
   <script>
-    const APP_VERSION = "v1.1.5";
+    const APP_VERSION = "v1.1.6";
     const STORAGE_KEY = "mercatini_slide_v3";
     const MAX_SLIDE_INDEX = 4;
 
@@ -797,7 +797,7 @@
     let activePosEventId = null;
     let pendingSaleProduct = null;
     let pendingConfirmAction = null;
-    const collapsedInventoryCategories = new Set();
+    const expandedInventoryCategories = new Set();
 
     function openConfirmModal({ title, message, confirmLabel = "Elimina", onConfirm }) {
       pendingConfirmAction = onConfirm;
@@ -1518,7 +1518,7 @@
           return labelA.localeCompare(labelB, "it", { sensitivity: "base" });
         });
 
-        const isOpen = query ? true : !collapsedInventoryCategories.has(group.key);
+        const isOpen = query ? true : expandedInventoryCategories.has(group.key);
         const groupDetails = document.createElement("details");
         groupDetails.className = "restock-group";
         if (isOpen) groupDetails.open = true;
@@ -1537,10 +1537,11 @@
         groupDetails.addEventListener("toggle", () => {
           if (query) return;
           if (groupDetails.open) {
-            collapsedInventoryCategories.delete(group.key);
+            expandedInventoryCategories.add(group.key);
           } else {
-            collapsedInventoryCategories.add(group.key);
+            expandedInventoryCategories.delete(group.key);
           }
+          updateFloatingFooterVisibility();
         });
 
         const groupList = groupDetails.querySelector(".list");
